@@ -27,6 +27,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Routes
 
+    ### Guest routes
     
     /login Make Login [POST]
     /register Register a new user [POST]
@@ -41,7 +42,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /coupon/{code} Get a coupon by its code [GET]
 
 
-
+    ### Authenticated routes
 
     /me Get Logged User Info [GET]    
     /logout Logout [GET]
@@ -49,7 +50,6 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /user/{id} Update user [PUT]
     /user/{id} Remove user [DELETE] 
       
-
     /product Create new product in store [POST] //ADMIN
     /product/{id} Update product info [PUT] //ADMIN
     /product/{id}  Remove product [DELETE] //ADMIN
@@ -74,51 +74,6 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /coupon/{code} Remove Coupon [DELETE] //ADMIN
     
     /checkout', [OrderController::class, 'generateCheckoutCode']);
-    
-# Login [/login]
-
-
-### Make Login [POST]
-
-# Logout [/logout]
-
-
-### Make Logout [GET]
-
-# User [/register]
-
-
-### Create User  [POST]
-
-# User [/user/{id}]
-
-### Get Logged User Info  [GET]
-
-# User [/me]
-
-### Update User [PUT]
-
-    
-# User [/user{id}]
-
-### Delete User [DELETE]
-
-    
-# User [/user{id}]
-
-
-### List [GET]
-
-# Products [/product/{id}]
-
-
-### Update [PUT]
-
-# Products [/product/{id}]
-
-
-### Delete [DELETE]
-
 
 ## 
 
