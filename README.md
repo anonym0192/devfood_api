@@ -56,9 +56,54 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
     Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
     Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
+    
+# Login [/login]
+
+
+### Make Login [POST]
+
+# Logout [/logout]
+
+
+### Make Logout [GET]
+
+# User [/register]
+
+
+###Create User  [POST]
+
+# User [/user/{id}]
+
+###Get Logged User Info  [GET]
+
+# User [/me]
+
+### Update User [PUT]
+
+    
+# User [/user{id}]
+
+### Delete User [DELETE]
+
+    
+# User [/user{id}]
+
+
+### List [GET]
+
+# Products [/product/{id}]
+
+
+### Update [PUT]
+
+# Products [/product/{id}]
+
+
+### Delete [DELETE]
+
 
 ## 
 
 ## Configuration
 
-For this project to work you need to fill the .env file using your local info. You need the MongoDB running in your local machine, don't forget to include the path of your Mongo database collection in the "DATABASE" field.
+
