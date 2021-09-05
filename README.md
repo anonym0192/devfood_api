@@ -27,7 +27,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Routes
 
-    ### Guest routes
+     <h3>Guest routes</h3>
     
     /login Make Login [POST]
     /register Register a new user [POST]
