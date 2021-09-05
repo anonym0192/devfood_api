@@ -25,17 +25,17 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Routes
 
- Route::get('/me', [AuthController::class, 'me']);
-    Route::get('/logout', [AuthController::class, 'logout']);
-    //Route::post('/refresh', [AuthController::class, 'refresh']);
+    /me    
+    /logout
+    /refresh
 
-    Route::put('/user/{id}', [UserController::class, 'update']);
-    Route::delete('/user/{id}', [UserController::class, 'destroy']);
+    put /user/{id}
+    delete('/user/{id}
       
 
-    Route::post('/product', [ProductController::class, 'store']);       //ADMIN
-    Route::put('/product/{id}', [ProductController::class, 'update']);   //ADMIN
-    Route::delete('/product/{id}', [ProductController::class, 'destroy']);  //ADMIN
+    post('/product //ADMIN
+    put('/product/{id}'
+    delete('/product/{id}  //ADMIN
 
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN
