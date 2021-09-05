@@ -27,7 +27,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Routes
 
-     -Guest routes
+     -Public routes
     
     /login Make Login [POST]
     /register Register a new user [POST]
@@ -42,7 +42,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /coupon/{code} Get a coupon by its code [GET]
 
 
-    -Authenticated routes (The user must be logged sending the header "Authorization: Bearer {token}")
+    -Protected routes (The user must be logged sending the header "Authorization: Bearer {token}")
  
     /me Get Logged User Info [GET]    
     /logout Logout [GET]
