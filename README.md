@@ -25,17 +25,16 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Routes
 
-    /me    
-    /logout
-    /refresh
+    /me Get Logged User Info [GET]    
+    /logout Logout [GET]
 
-    put /user/{id}
-    delete('/user/{id}
+    /user/{id} Update user [PUT]
+    /user/{id} Remove user [DELETE] 
       
 
-    post('/product //ADMIN
-    put('/product/{id}'
-    delete('/product/{id}  //ADMIN
+    /product Create new product in store [POST] //ADMIN
+    /product/{id} Update product info [PUT] //ADMIN
+    /product/{id}  Remove product [DELETE] //ADMIN
 
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN
@@ -106,4 +105,13 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 ## Configuration
 
+The following database info must be filled in .env file
 
+    DB_CONNECTION=
+    DB_HOST=
+    DB_PORT=
+    DB_DATABASE=
+    DB_USERNAME=
+    DB_PASSWORD=
+    
+The Pagseguro credentials like Pagseguro account e-mail and token is also required in the config file inside pagseguro paste
