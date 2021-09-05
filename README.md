@@ -70,11 +70,11 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 # User [/register]
 
 
-###Create User  [POST]
+### Create User  [POST]
 
 # User [/user/{id}]
 
-###Get Logged User Info  [GET]
+### Get Logged User Info  [GET]
 
 # User [/me]
 
