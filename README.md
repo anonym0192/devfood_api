@@ -1,62 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Devfood api
+Backend version of a REST API using Laravel, the payment of item is made using a Pagseguro integrated LIB 
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Features
+-Create a new User , Delete and Update its profile info
 
-## About Laravel
+-A User who is admin can Register a new Product
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-Login Authentication using a token
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-List Products
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-Search Products by name and by category
 
-## Learning Laravel
+-Save, Update and Delete Cart Itens
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-A User who is admin can Create and Delete Coupons
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-Generate Checkout code using Pagseguro LIB
 
-## Laravel Sponsors
+-List Orders
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+-Admin  can Create , Update and Delete new orders
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+## Routes
 
-## Contributing
+ Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/logout', [AuthController::class, 'logout']);
+    //Route::post('/refresh', [AuthController::class, 'refresh']);
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    Route::put('/user/{id}', [UserController::class, 'update']);
+    Route::delete('/user/{id}', [UserController::class, 'destroy']);
+      
 
-## Code of Conduct
+    Route::post('/product', [ProductController::class, 'store']);       //ADMIN
+    Route::put('/product/{id}', [ProductController::class, 'update']);   //ADMIN
+    Route::delete('/product/{id}', [ProductController::class, 'destroy']);  //ADMIN
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN
+    Route::post('/order', [OrderController::class, 'store']); 
+    Route::put('/order', [OrderController::class, 'update']); //ADMIN
+    Route::post('order/notify', [OrderController::class, 'notifyPayment']);
+    Route::delete('/order/{id}', [OrderController::class, 'destroy']);  //ADMIN
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    Route::get('/cart', [CartController::class, 'getCartItems']);
+    Route::post('/cart', [CartController::class, 'createCartItems']);
+    Route::put('/cart', [CartController::class, 'saveCartItems']);
+    Route::put('/cart/plus/{id}', [CartController::class, 'addItemQt']);
+    Route::put('/cart/minus/{id}', [CartController::class, 'subtractItemQt']);
+    Route::delete('/cart/delete/{id}', [CartController::class, 'deleteCartItem']);
+    Route::put('/cart/remove/{id}', [CartController::class, 'subtractItemQt']);
+    Route::delete('/cart/clean', [CartController::class, 'cleanCart']);
 
-## License
+    Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
+    Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 
+
+## Configuration
+
+For this project to work you need to fill the .env file using your local info. You need the MongoDB running in your local machine, don't forget to include the path of your Mongo database collection in the "DATABASE" field.
