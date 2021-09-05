@@ -22,8 +22,26 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 
 -Admin  can Create , Update and Delete new orders
 
+-Products and Orders Pagination
+
 
 ## Routes
+
+    
+    /login Make Login [POST]
+    /register Register a new user [POST]
+    
+    /categories List all product categories [GET]
+    
+    /products List all available products [GET]
+    /products/{category}  Get products by category [GET]
+    /product/{id} Get one product by id [GET]
+    /products/search/{name} Search products by name [GET]
+    
+    /coupon/{code} Get a coupon by its code [GET]
+
+
+
 
     /me Get Logged User Info [GET]    
     /logout Logout [GET]
@@ -36,25 +54,26 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /product/{id} Update product info [PUT] //ADMIN
     /product/{id}  Remove product [DELETE] //ADMIN
 
-    Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN
-    Route::post('/order', [OrderController::class, 'store']); 
-    Route::put('/order', [OrderController::class, 'update']); //ADMIN
-    Route::post('order/notify', [OrderController::class, 'notifyPayment']);
-    Route::delete('/order/{id}', [OrderController::class, 'destroy']);  //ADMIN
+    /orders List all orders from a user [GET]
+    /order/{id} Get a specific order [GET] //ADMIN
+    /order Create a new order [POST] 
+    /order Update Order [PUT] //ADMIN
+    /order/notify Change order status [POST]
+    /order/{id} Remove order [DELETE]  //ADMIN
 
 
-    Route::get('/cart', [CartController::class, 'getCartItems']);
-    Route::post('/cart', [CartController::class, 'createCartItems']);
-    Route::put('/cart', [CartController::class, 'saveCartItems']);
-    Route::put('/cart/plus/{id}', [CartController::class, 'addItemQt']);
-    Route::put('/cart/minus/{id}', [CartController::class, 'subtractItemQt']);
-    Route::delete('/cart/delete/{id}', [CartController::class, 'deleteCartItem']);
-    Route::put('/cart/remove/{id}', [CartController::class, 'subtractItemQt']);
-    Route::delete('/cart/clean', [CartController::class, 'cleanCart']);
+    /cart Get cart itens [GET]
+    /cart Create a new cart [POST]
+    /cart Save new itens in cart  [PUT]
+    /cart/plus/{id} Add cart item quantity plus 1 [PUT]
+    /cart/minus/{id} Reduce cart item quantity minus 1 [PUT]
+    /cart/delete/{id} Add cart item quantity plus 1 [DELETE]
+    /cart/clean Clean the cart [DELETE]
 
-    Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
-    Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
+    /coupon/{code} Create Coupon [POST] //ADMIN
+    /coupon/{code} Remove Coupon [DELETE] //ADMIN
+    
+    /checkout', [OrderController::class, 'generateCheckoutCode']);
     
 # Login [/login]
 
