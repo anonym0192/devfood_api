@@ -73,7 +73,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /coupon/{code} Create Coupon [POST] //ADMIN
     /coupon/{code} Remove Coupon [DELETE] //ADMIN
     
-    /checkout', [OrderController::class, 'generateCheckoutCode']);
+    /checkout Generate checkout code for paying process [POST]
 
 ## 
 
