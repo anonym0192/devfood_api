@@ -35,26 +35,5 @@ class CategoryController extends Controller
     public function createCategory(Request $request)
     {
 
-      /*  if(!auth()->user()->admin === 1){
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $validator = Validator::make($request->all() , [
-            
-        ]); 
-
-        if($validator->fails()){
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
-        $category = category::create([
-                
-            ]);
-
-        $category->save();
-
-
-        return response()->json(['msg' => 'category created successfully!', 'category' => $category], 201);
-            */
     }
 }

@@ -98,13 +98,13 @@ class CreateAllTables extends Migration
             $table->date('expire_date');
         });
 
-        Schema::create('cities_available', function (Blueprint $table){
+        Schema::create('cities', function (Blueprint $table){
             $table->id();
             $table->string('name');
-            $table->string('state');
+            $table->char('state', 2);
         });
 
-        Schema::create('districts_available', function (Blueprint $table){
+        Schema::create('districts', function (Blueprint $table){
             $table->id();
             $table->string('name');
             $table->foreignId('city');

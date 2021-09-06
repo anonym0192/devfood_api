@@ -57,12 +57,12 @@ class AllTablesSeeder extends Seeder
             ['code' => 'ACB123456', 'type' => 'fixed', 'value' => 3.15],
         );
 
-        DB::table('cities_available')->insert(
-            ['name' => 'São Paulo'],
-            ['name' => 'Guarulhos'],
+        DB::table('cities')->insert(
+            ['name' => 'São Paulo', 'state' => 'SP'],
+            ['name' => 'Guarulhos', 'state' => 'SP'],
         );
 
-        DB::table('districts_available')->insert(
+        DB::table('districts')->insert(
             ['name' => 'Centro', 'city' => 1, 'available' => true],
             ['name' => 'Pinheiros', 'city' => 1, 'available' => true],
             ['name' => 'Centro', 'city' => 2, 'available' => true],

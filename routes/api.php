@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\DeliveryAreaController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,6 +37,12 @@ Route::get('/products/search/{name}', [ProductController::class, 'search']);
 
 Route::get('/coupon/{code}', [CouponController::class, 'useCoupon']);
 
+//Route::get('/deliverycalc', [OrderController::class, 'deliveryCalculate']);
+
+Route::get('/cities', [DeliveryAreaController::class, 'getCities']);
+Route::get('/districts', [DeliveryAreaController::class, 'getDistricts']);
+
+
 
 
 /* Protected Routes */
@@ -49,7 +56,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::put('/user/{id}', [UserController::class, 'update']);
     Route::delete('/user/{id}', [UserController::class, 'destroy']);
       
-
     Route::post('/product', [ProductController::class, 'store']);       //ADMIN
     Route::put('/product/{id}', [ProductController::class, 'update']);   //ADMIN
     Route::delete('/product/{id}', [ProductController::class, 'destroy']);  //ADMIN
@@ -60,7 +66,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::put('/order', [OrderController::class, 'update']); //ADMIN
     Route::post('order/notify', [OrderController::class, 'notifyPayment']);
     Route::delete('/order/{id}', [OrderController::class, 'destroy']);  //ADMIN
-
 
     Route::get('/cart', [CartController::class, 'getCartItems']);
     Route::post('/cart', [CartController::class, 'createCartItems']);
@@ -73,41 +78,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
     Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
-    
-
-    Route::get('/deliverycalc', [OrderController::class, 'deliveryCalculate']);
-
-    
 
     Route::post('/checkout', [OrderController::class, 'generateCheckoutCode']);
 
+    //Route::post('/deliveryareas', [DeliveryAreaController::class, 'addCity']);
+    //Route::post('/deliveryareas', [DeliveryAreaController::class, 'addDistrict']);
+
 });
-
-/*Route::group(['middleware' => ['auth::admin'], 'prefix' => 'admin'], function(){
-
-    Route::post('/login', [AdminAuthController::class, 'login']);
-    Route::get('/logout', [AdminAuthController::class, 'logout']);
-
-    Route::get('/users', [AdminUserController::class, 'index']);
-    Route::post('/user', [AdminUserController::class, 'store']);
-    Route::put('/user/{id}', [AdminUserController::class, 'update']);
-    Route::delete('/user/{id}', [AdminUserController::class, 'destroy']);  //Admin route
-
-    Route::get('/products', [AdminProductController::class, 'index']);
-    Route::post('/product', [AdminProductController::class, 'store']); //Admin route
-    Route::put('/product/{id}', [AdminProductController::class, 'update']); //Admin route
-    Route::delete('/product/{id}', [AdminProductController::class, 'destroy']); //Admin route
-
-    Route::get('/orders', [AdminOrderController::class, 'index']); //Admin route
-    Route::get('/order/{id}', [AdminOrderController::class, 'show']); //Admin route
-    Route::post('/order', [AdminOrderController::class, 'store']); //Admin route
-    Route::put('/order', [AdminOrderController::class, 'update']); //Admin route
-    Route::delete('/order/{id}', [AdminOrderController::class, 'destroy']); //Admin route
-
-    Route::get('/cupom', [AdminCupomController::class, 'checkCupom']);
-});
-
-*/
-
-
 
