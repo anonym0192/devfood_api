@@ -37,7 +37,7 @@ class AuthController extends Controller
     
         $token = $user->createToken($request->email)->plainTextToken;
 
-        return [ 'token' => $token , 'user' => $user ];
+        return response()->json( [ 'token' => $token , 'user' => $user ] );
     }
 
 
@@ -52,6 +52,21 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
+    
+    /**
+     * Refresh Token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refresh()
+    {
+        Auth::user()->tokens()->delete();
+
+        $token = Auth::user()->createToken(Auth::user()->email)->plainTextToken;
+
+        return response()->json([ 'token' => $token ]);
+    }
+
     /**
      * Get the authenticated User.
      *
@@ -61,6 +76,9 @@ class AuthController extends Controller
     {
         return response()->json( Auth::user());
     }
+
+
+
 
     public function unauthorized(){
         return response()->json(['error' => 'Unauthorized'], 401);
