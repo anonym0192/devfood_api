@@ -84,6 +84,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::post('/city', [DeliveryAreaController::class, 'addCity']);
     Route::post('/district', [DeliveryAreaController::class, 'addDistrict']);
+
+    Route::put('/district/disable/{id}', [DeliveryAreaController::class, 'disableDistrict']);
+    Route::put('/district/enable/{id}', [DeliveryAreaController::class, 'enableDistrict']);
+
+    Route::delete('/city/{id}', [DeliveryAreaController::class, 'removeCity']);
+    Route::delete('/district/{id}', [DeliveryAreaController::class, 'removeDistrict']);
     
 
 });

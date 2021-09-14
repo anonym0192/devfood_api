@@ -60,12 +60,14 @@ class AllTablesSeeder extends Seeder
         DB::table('cities')->insert(
             ['name' => 'São Paulo', 'state' => 'SP'],
             ['name' => 'Guarulhos', 'state' => 'SP'],
+            ['name' => 'Rio de Janeiro', 'state' => 'RJ'],
         );
 
         DB::table('districts')->insert(
             ['name' => 'Centro', 'city' => 1, 'available' => true, 'delivery_cost' => 3.00],
             ['name' => 'Pinheiros', 'city' => 1, 'available' => true, 'delivery_cost' => 5.65],
             ['name' => 'Centro', 'city' => 2, 'available' => true],
+            ['name' => 'Centro', 'city' => 3, 'available' => true],
         );
     }
 }

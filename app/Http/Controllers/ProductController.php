@@ -21,7 +21,7 @@ class ProductController extends Controller
         //
         $response = [];
 
-        $products_per_page = 2;
+        $products_per_page = 10;
 
         $category = $request->query('category');
         $search = $request->query('search') ?? '';

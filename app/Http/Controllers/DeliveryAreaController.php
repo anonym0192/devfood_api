@@ -56,7 +56,7 @@ class DeliveryAreaController extends Controller
         }
 
         $validator = Validator::make($request->all() , [
-            'name' => "required|string|min:4|max:10|regex:/^[a-zA-Z-0-9']*$/",
+            'name' => "required|string|min:4|max:80|regex:/^[a-zA-Z-0-9'\s]*$/",
             'state' => "required|string|min:2|max:2|regex:/^[a-zA-Z]*$/",
         ]); 
 
@@ -96,7 +96,7 @@ class DeliveryAreaController extends Controller
         }
 
         $validator = Validator::make($request->all() , [
-            'name' => "required|string|min:4|max:10|regex:/^[a-zA-Z-0-9']*$/",
+            'name' => "required|string|min:4|max:80|regex:/^[a-zA-Z-0-9'\s]*$/",
             'city' => "required|numeric",
             'delivery_cost' => "nullable|regex:/^\d+(\.\d{1,2})?$/",
         ]); 
@@ -121,6 +121,116 @@ class DeliveryAreaController extends Controller
 
         return response()->json(['msg' => 'District created successfully!', 'district' => $district], 201);
 
+
+    }
+
+    /**
+     * Remove a city
+     *
+     * @param  Request $request 
+     * @param  int $id  
+     * @return \Illuminate\Http\Response
+     */
+
+    public function removeCity(Request $request, $id)
+    {
+
+
+        if(!auth()->user()->admin === 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $city = City::find($id);
+;
+        if($city){
+
+            $city->delete();
+
+            $districts = District::where('city', $id)->delete();
+
+            return response()->json(['msg' => 'City '. $id .' deleted successfully!']);
+        }else{
+            return response()->json(['error' => 'City '. $id .' does not exist!'], 404);
+        }
+    }
+
+     /**
+     * Remove a District
+     *
+     * @param  Request $request  
+     * @param  int $id 
+     * @return \Illuminate\Http\Response
+     */
+
+    public function removeDistrict(Request $request, $id)
+    {
+
+        if(!auth()->user()->admin === 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $district = District::find($id);
+;
+        if($district){
+            $district->delete();
+            return response()->json(['msg' => 'District '. $id .' deleted successfully!']);
+        }else{
+            return response()->json(['error' => 'District '. $id .' does not exist!'], 404);
+        }
+
+    }
+
+    /**
+     * Disable a district to make it unavailable
+     *
+     * @param  Request $request  
+     * @param  int $id 
+     * @return \Illuminate\Http\Response
+     */
+
+    public function disableDistrict(Request $request, $id)
+    {
+
+        if(!auth()->user()->admin === 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $district = District::find($id);
+;
+        if($district){
+            $district->available = false;
+            $district->save();
+            return response()->json(['msg' => 'District '. $id .' was made unavailable successfully!']);
+        }else{
+            return response()->json(['error' => 'District '. $id .' does not exist!'], 404);
+        }
+
+    }
+
+        /**
+     * Disable a district to make it unavailable
+     *
+     * @param  Request $request  
+     * @param  int $id 
+     * @return \Illuminate\Http\Response
+     */
+
+    public function enableDistrict(Request $request, $id)
+    {
+
+        if(!auth()->user()->admin === 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $district = District::find($id);
+;
+        if($district){
+            $district->available = true;
+            $district->save();
+            return response()->json(['msg' => 'District '. $id .' was available successfully!']);
+        }else{
+            return response()->json(['error' => 'District '. $id .' does not exist!'], 404);
+        }
 
     }
 

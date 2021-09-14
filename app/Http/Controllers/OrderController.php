@@ -28,7 +28,7 @@ class OrderController extends Controller
         //
         $response = [];
 
-        $orders_per_page = 2;
+        $orders_per_page = 10;
 
         $page = $request->query('page');
 
