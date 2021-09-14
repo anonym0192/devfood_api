@@ -108,7 +108,8 @@ class CreateAllTables extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('city');
-            $table->boolean('available');
+            $table->boolean('available')->default(true);
+            $table->decimal('delivery_cost', 5,2)->default(3.00);
         });
         
 

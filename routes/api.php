@@ -10,6 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DeliveryAreaController;
+use App\Http\Controllers\TransactionController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -64,7 +65,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN
     Route::post('/order', [OrderController::class, 'store']); 
     Route::put('/order', [OrderController::class, 'update']); //ADMIN
-    Route::post('order/notify', [OrderController::class, 'notifyPayment']);
+    Route::post('order/notify', [TransactionController::class, 'notifyPayment']);
     Route::delete('/order/{id}', [OrderController::class, 'destroy']);  //ADMIN
 
     Route::get('/cart', [CartController::class, 'getCartItems']);
@@ -79,10 +80,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
     Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
 
-    Route::post('/checkout', [OrderController::class, 'generateCheckoutCode']);
+    Route::post('/checkout', [TransactionController::class, 'generateCheckoutCode']);
 
-    //Route::post('/deliveryareas', [DeliveryAreaController::class, 'addCity']);
-    //Route::post('/deliveryareas', [DeliveryAreaController::class, 'addDistrict']);
+    Route::post('/city', [DeliveryAreaController::class, 'addCity']);
+    Route::post('/district', [DeliveryAreaController::class, 'addDistrict']);
+    
 
 });
 

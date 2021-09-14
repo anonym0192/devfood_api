@@ -10,4 +10,6 @@ class District extends Model
     use HasFactory;
 
     public $timestamps = false;
+
+    protected $fillable = ['name', 'city', 'available', 'delivery_cost'];
 }

@@ -63,8 +63,8 @@ class AllTablesSeeder extends Seeder
         );
 
         DB::table('districts')->insert(
-            ['name' => 'Centro', 'city' => 1, 'available' => true],
-            ['name' => 'Pinheiros', 'city' => 1, 'available' => true],
+            ['name' => 'Centro', 'city' => 1, 'available' => true, 'delivery_cost' => 3.00],
+            ['name' => 'Pinheiros', 'city' => 1, 'available' => true, 'delivery_cost' => 5.65],
             ['name' => 'Centro', 'city' => 2, 'available' => true],
         );
     }
