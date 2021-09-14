@@ -64,6 +64,11 @@ class DeliveryAreaController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
+        $cityExists = City::where('name', $request->input('name'))->where('state', $request->input('state'))->first();
+        if($cityExists){
+            return response()->json(['error' => 'City already exists'], 400);
+        }   
+
         $city = City::create([
                 'name' => $request->input('name'),
                 'state' => $request->input('state')
@@ -99,6 +104,11 @@ class DeliveryAreaController extends Controller
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()], 400);
         }
+
+        $districtExists = District::where('name', $request->input('name'))->where('city', $request->input('city'))->first();
+        if($districtExists){
+            return response()->json(['error' => 'District already exists'], 400);
+        }   
 
         $district = District::create([
                 'name' => $request->input('name'),
