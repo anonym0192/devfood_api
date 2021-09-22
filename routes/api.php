@@ -10,7 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DeliveryAreaController;
-use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CheckOutController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -80,7 +80,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('coupon/{code}', [CouponController::class, 'createCoupon']);
     Route::delete('coupon/{code}', [CouponController::class, 'removeCoupon']);
 
-    Route::post('/checkout', [TransactionController::class, 'generateCheckoutCode']);
+    Route::post('/checkout', [CheckOutController::class, 'generateCheckoutCode']);
 
     Route::post('/city', [DeliveryAreaController::class, 'addCity']);
     Route::post('/district', [DeliveryAreaController::class, 'addDistrict']);

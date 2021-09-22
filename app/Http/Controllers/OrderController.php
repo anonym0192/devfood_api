@@ -58,18 +58,22 @@ class OrderController extends Controller
 
             switch($order->status){
                 case '0':
-                    $order['status'] = 'Preparando';
+                case '1': // Aguardando Pgto.
+                case '2': // Em análise
+                    $order['status'] = 'Aguardando Pgto';
                     break;
-                case '1':
-                    $order['status'] = 'Saiu pra entrega';
+                case '3': // Paga
+                case '4': // Disponível
+                    $order['status'] = 'Aprovado';
                     break;
-                case '2':
-                    $order['status'] = 'Entregue';
+                case '6': // Devolvida
+                case '7': // Cancelada
+                    $order['status'] = 'Cancelado';
                     break;
             }
 
             
-            if($transaction){
+            /*if($transaction){
                 switch($transaction['type']){
                     case '0':
                         $order['payment_type'] = 'Cartão de Debito';
@@ -78,7 +82,7 @@ class OrderController extends Controller
                         $order['payment_type'] = 'Cartão de Crédito';
                         break;
                 }
-            }
+            } */
             
             $productList = [];
         
@@ -217,8 +221,6 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         //
-
-        $status = ['pedido','saiu pra entrega', 'entregue','cancellado'];
        
         if(!$request->input('products')){
             return response()->json(['error' => 'The products data is empty or contains an error'],400);
@@ -231,7 +233,7 @@ class OrderController extends Controller
                 'products.*.id' => 'required|numeric',
                 'products.*.qt' => 'required|numeric',
                 'paymentType' => 'required|numeric',
-                'deliveryCost' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+                'deliveryCost' => 'numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'cupom' => 'nullable|string|max:200',
                 'street' => 'required|string|max:80',
                 'complement' => 'nullable|string|max:80',
@@ -264,6 +266,9 @@ class OrderController extends Controller
             Payment process
         */
 
+        $deliveryCost = $request->input('deliveryCost') || 0;
+        $total += $deliveryCost;
+
         $order = new Order;
         $order->user_id = Auth::user()->id;
         $order->total = $total;
@@ -274,7 +279,7 @@ class OrderController extends Controller
         $order->postal_code = $request->input('postalCode');
         $order->city = $request->input('city');
         $order->state = $request->input('state');
-        $order->delivery_cost = $request->input('deliveryCost');
+        $order->delivery_cost = $deliveryCost;
 
         
         $order->save();
@@ -291,11 +296,35 @@ class OrderController extends Controller
         $transactionCode = $request->input('transactionCode');
         $paymentType = $request->input('paymentType', 1);
 
-        $this->createTransaction( $transactionCode, $order->id);
+        $this->generateTransaction( $transactionCode, $order->id , 1);
 
 
 
         return response()->json(['msg' => "Order created successfully", 'order' => $order]);
+
+    }
+
+       /**
+     * Create a new transaction
+     *
+     * @param  String  $transactionCode
+     * @param  int  $orderId
+     * @param  int  $paymentType
+     * @return Array
+     */
+    private function generateTransaction(String $transactionCode, int $orderId, int $paymentType = 1)
+    {
+        //
+        $transaction = new Transaction;
+
+        $transaction->code = $transactionCode;
+        $transaction->mode = $paymentType;
+        $transaction->type = 1;
+        $transaction->status = 1;
+        $transaction->user_id = Auth::user()->id;
+        $transaction->order_id = $orderId;
+        $transaction->save();
+          
 
     }
 

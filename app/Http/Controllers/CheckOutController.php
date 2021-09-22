@@ -7,37 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Transaction;
 
-class TransactionController extends Controller
+
+class CheckOutController extends Controller
 {
     //
 
-        /**
-     * Create a new transaction
-     *
-     * @param  Array  $data
-     * @return Array
-     */
-    private function createTransaction(String $transactionCode, int $orderId, int $paymentType )
-    {
-        //
-        $transaction = new Transaction;
-
-        $transaction->code = $transactionCode;
-        //$transaction->mode = $paymentType;
-        $transaction->type = 1;
-        //$transaction->status = '1';
-        $transaction->user_id = Auth::user()->id;
-        $transaction->order_id = $orderId;
-        $transaction->save();
-          
-
-    }
-
-
+     
     /**
      * Genarate the checkout code for Pagseguro
      *
-     * @param  Request  $id
+     * @param  Request  $request
      * @return \Illuminate\Http\Response
      */
     public function generateCheckoutCode(Request $request)
@@ -158,7 +137,7 @@ class TransactionController extends Controller
     }
 
     /**
-     * Create a new transaction
+     * Notify and change the payment status
      *
      * @param  Request  $request
      * @return \Illuminate\Http\Response
@@ -181,6 +160,7 @@ class TransactionController extends Controller
             }
 
             print_r($response);
+            
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }

@@ -52,14 +52,14 @@ class CreateAllTables extends Migration
             $table->id();
             $table->decimal('total', 5,2);
             $table->foreignId('user_id');
-            $table->foreignId('cupom')->nullable();
+            //$table->foreignId('cupom')->nullable();
             $table->string('street',100);
             $table->string('number',80);
             $table->string('complement',80)->nullable();
             $table->string('postal_code',20);
             $table->string('city',80);
             $table->char('state',2);
-            $table->integer('status',1)->default(0);
+            //$table->smallInteger('status')->default(0);
             $table->decimal('delivery_cost', 5,2);
             $table->timestamps();
             $table->foreignId('transactions');
@@ -78,7 +78,7 @@ class CreateAllTables extends Migration
             $table->string('code');
             $table->smallInteger('mode')->default(0);
             $table->smallInteger('type')->default(1);
-            $table->string('status,20')->default('pending');
+            $table->smallInteger('status')->default(1);
             $table->foreignId('user_id');
             $table->foreignId('order_id')->unique();
             $table->timestamps();
