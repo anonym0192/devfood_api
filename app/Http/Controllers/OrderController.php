@@ -266,7 +266,7 @@ class OrderController extends Controller
             Payment process
         */
 
-        $deliveryCost = $request->input('deliveryCost') || 0;
+        $deliveryCost = $request->input('deliveryCost') ?? 0;
         $total += $deliveryCost;
 
         $order = new Order;
