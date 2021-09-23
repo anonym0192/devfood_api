@@ -19,9 +19,9 @@ class UserController extends Controller
         $validator = Validator::make($request->all() , [
                         'name' => "required|string|min:2|max:100|regex:/^[a-zA-Z-' ]*$/",
                         'email' => "required|min:5|max:80|email|unique:users,email",
-                        'cpf' => "required|numeric|min:12",
-                        'bornDate' => "required|date",
-                        'areacode' => 'nullable|digits:2',
+                        'cpf' => "required|numeric|min:11",
+                        'born_date' => "required|date",
+                        'area_code' => 'nullable|digits:2',
                         'phone' => "nullable|string|min:8|max:20",
                         //'cellphone' => "nullable|string|min:8|max:20",
                         'password' => "required|string|confirmed|min:3|max:13",
@@ -36,10 +36,10 @@ class UserController extends Controller
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
                     'cpf' => $request->input('cpf'),
-                    'bornDate' => $request->input('bornDate'),
+                    'born_date' => $request->input('born_date'),
                     'phone' => $request->input('phone'),
                     //'cellphone' => $request->input('cellphone'),
-                    'areacode' => $request->input('areacode'),
+                    'area_code' => $request->input('area_code'),
                     'password' => bcrypt($request->input('password')),
                     //'username' => $request->input('username')
                 ]);
@@ -67,9 +67,9 @@ class UserController extends Controller
         $validator = Validator::make($request->all() , [
             'name' => "string|min:2|max:100|regex:/^[a-zA-Z-' ]*$/",
             'email' => "email|min:5|max:80",
-            'cpf' => "nullable|numeric|min:12",
-            'bornDate' => "nullable|date",
-            'areacode' => 'nullable|digits:2',
+            'cpf' => "nullable|require|numeric|min:11",
+            'born_date' => "nullable|date",
+            'area_code' => 'nullable|digits:2',
             'phone' => "nullable|string|min:8|max:20",
             //'cellphone' => "nullable|string|min:8|max:20",
             'password' => "nullable|confirmed|min:3|max:13",
@@ -113,12 +113,12 @@ class UserController extends Controller
                 $user->cpf = $request->input('cpf');
             }
 
-            if($request->input('bornDate')){
-                $user->bornDate = $request->input('bornDate');
+            if($request->input('born_date')){
+                $user->born_date = $request->input('born_date');
             }
 
-            if($request->input('areacode')){
-                $user->areacode = $request->input('areacode');
+            if($request->input('area_code')){
+                $user->area_code = $request->input('area_code');
             }
 
             if($request->input('phone')){

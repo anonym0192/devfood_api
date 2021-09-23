@@ -21,53 +21,53 @@ class AllTablesSeeder extends Seeder
             'email' => 'teste@gmail.com',
             'password' => Hash::make(666),
             //'username' => 'tester',
-            'cpf' => 151646478247,
-            'bornDate' => '1992-01-01',
-            'areacode' => 11,
+            'cpf' => 15164630129,
+            'born_date' => '1992-01-01',
+            'area_code' => 11,
             'phone' => 991058256,
             'admin' => true,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        DB::table('categories')->insert(
+        DB::table('categories')->insert([
             ['name' => 'Bebidas', 'slug' => 'bebidas', 'image' => 'drink.png'],
-            ['name' => 'Hamburguer', 'slug' => 'hamburgueres', 'image' => 'burguer.png'],
+            ['name' => 'Hamburgueres', 'slug' => 'hamburgueres', 'image' => 'burguer.png'],
             ['name' => 'Combos', 'slug' => 'combos', 'image' => 'combo.png'],
             ['name' => 'Massas', 'slug' => 'massas', 'image' => 'pizza.png'],
             ['name' => 'Doces', 'slug' => 'doces', 'image' => 'cake.png']
-        );
+        ]);
 
-        DB::table('products')->insert(
+        DB::table('products')->insert([
             ['name' => 'Donut de Chocolate', 'description' => 'Donut feito de chocolate e açucar', 'image' => 'donutchocolate.jpg', 'price' => '15.00', 'category_id' => '5'],
             ['name' => 'Donut de Flocos', 'description' => 'Donut com flocos e cobertura de morango', 'image' => 'donutflocos.jpg', 'price' => '15.00',  'category_id' => '5'],
             ['name' => 'Torta de Chocolate', 'description' => 'Uma torta de chocolate', 'image' => 'tortachocolate.jpg', 'price' => '12.00', 'category_id' => '5'],
             ['name' => 'Torta de Morango', 'description' => 'Uma torta de morango', 'image' => 'tortamorango.jpg', 'price' => '12.00',  'category_id' => '5'],
             ['name' => 'Combo X-tudo + Batata + refrigerante', 'description' => 'Hamburguer X-tudo com batata-frita e refrigerante 350ml', 'image' => 'combo1.jpg', 'price' => '25.00',  'category_id' => '3']
-        );
+        ]);
 
-        DB::table('payment_type')->insert([
+        DB::table('payment_types')->insert([
             'id' => '1',
             'name' => 'Pagseguro',
         ]);
 
-        DB::table('coupons')->insert(
-            ['code' => 'ABC123456', 'type' => 'fixed' , 'value' => 4.00],
-           // ['code' => 'ABC123321','type' => 'percent', 'value' => 15],
-            ['code' => 'ACB123456', 'type' => 'fixed', 'value' => 3.15],
-        );
+        DB::table('coupons')->insert([
+            ['code' => 'ABC123456', 'type' => 'fixed' , 'value' => 4.00 , 'expire_date' => date('Y-m-d', strtotime('+3 month'))],
+           // ['code' => 'ABC123321','type' => 'percent', 'value' => 15, 'expire_date' => date('Y-m-d', strtotime('+3 month'))],
+            ['code' => 'ACB123456', 'type' => 'fixed', 'value' => 3.15, 'expire_date' => date('Y-m-d', strtotime('+3 month'))],
+        ]);
 
-        DB::table('cities')->insert(
+        DB::table('cities')->insert([
             ['name' => 'São Paulo', 'state' => 'SP'],
             ['name' => 'Guarulhos', 'state' => 'SP'],
             ['name' => 'Rio de Janeiro', 'state' => 'RJ'],
-        );
+        ]);
 
-        DB::table('districts')->insert(
+        DB::table('districts')->insert([
             ['name' => 'Centro', 'city' => 1, 'available' => true, 'delivery_cost' => 3.00],
             ['name' => 'Pinheiros', 'city' => 1, 'available' => true, 'delivery_cost' => 5.65],
-            ['name' => 'Centro', 'city' => 2, 'available' => true],
-            ['name' => 'Centro', 'city' => 3, 'available' => true],
-        );
+            ['name' => 'Centro', 'city' => 2, 'available' => true, 'delivery_cost' => 4],
+            ['name' => 'Centro', 'city' => 3, 'available' => true, 'delivery_cost' => 3.50],
+        ]);
     }
 }

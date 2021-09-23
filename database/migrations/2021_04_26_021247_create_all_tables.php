@@ -34,14 +34,14 @@ class CreateAllTables extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name', 200);
-            $table->string('email', 50)->unique();
+            $table->string('email', 50);
            // $table->string('username', 50)->unique();
-            $table->string('password', 50);
-            $table->integer('phone', 20 )->nullable();
-            $table->integer('areacode', 2 )->nullable();
-            $table->integer('cellphone', 20 )->nullable();
-            $table->integer('cpf', 20 );
-            $table->date('borndate')->nullable();
+            $table->string('password', 100);
+            $table->integer('phone')->nullable();
+            $table->smallInteger('area_code')->nullable();
+            //$table->integer('cellphone')->nullable();
+            $table->bigInteger('cpf');
+            $table->date('born_date')->nullable();
             $table->boolean('admin')->default(false);
             $table->rememberToken();
             $table->timestamps();
@@ -76,9 +76,9 @@ class CreateAllTables extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->smallInteger('mode')->default(0);
-            $table->smallInteger('type')->default(1);
-            $table->smallInteger('status')->default(1);
+            $table->tinyInteger('mode')->default(0);
+            $table->tinyInteger('type')->default(1);
+            $table->tinyInteger('status')->default(1);
             $table->foreignId('user_id');
             $table->foreignId('order_id')->unique();
             $table->timestamps();
