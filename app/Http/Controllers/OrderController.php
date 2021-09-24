@@ -52,7 +52,7 @@ class OrderController extends Controller
 
             $transaction = Transaction::where('order_id', $order['id'])->first();
 
-            switch($order->status){
+            switch($transaction->status){
                 case '0':
                 case '1': // Aguardando Pgto.
                 case '2': // Em análise
