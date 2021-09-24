@@ -12,10 +12,6 @@ use App\Models\Transaction;
 
 class OrderController extends Controller
 {
-
-    function __construct(){
-    
-    }
     
     //
      /**
@@ -47,7 +43,7 @@ class OrderController extends Controller
         $pages = ceil( $orders_total / $orders_per_page );
         
         
-        $orders = $orders->offset($offset)->limit($orders_per_page)->get();
+        $orders = $orders->offset($offset)->limit($orders_per_page)->orderBy('created_at')->get();
         
 
         foreach($orders as $order){

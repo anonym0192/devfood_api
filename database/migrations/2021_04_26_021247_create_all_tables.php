@@ -62,7 +62,6 @@ class CreateAllTables extends Migration
             //$table->smallInteger('status')->default(0);
             $table->decimal('delivery_cost', 5,2);
             $table->timestamps();
-            $table->foreignId('transactions');
         });
 
         Schema::create('order_items', function (Blueprint $table) {
