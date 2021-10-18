@@ -10,6 +10,26 @@ use Tests\TestCase;
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    private $user;
+
+    private $token;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->state([
+            'password' => bcrypt('666')
+        ])->create();
+
+        $this->token = $this->user->createToken('email')->plainTextToken;
+        
+    }
+
+    public function tearDown(): void{
+        $this->user->delete();
+    }
    
     /**
      * A basic test example.
@@ -36,38 +56,30 @@ class AuthControllerTest extends TestCase
      *
      * @return void
      */
-    public function testUserShouldLoginAndReturnToken() : string 
+    public function testUserShouldLoginAndReturnToken() 
     {
-       
 
-        $password = Str::random(13);
-
-        $user = User::factory()->state([
-            'cpf' => '11111111111',
-            'password' => bcrypt($password)
-        ])->create();
-
-
-        $payload = ['email' => $user->email , 'password' => $password];
+        $payload = ['email' => $this->user->email , 'password' => '666'];
 
         $response = $this->post('api/login', $payload);
 
         $response->assertOk();
         $response->assertJsonStructure(['token' => [], 'user' => []]);
 
-        return $response['token'];
+        
 
     }
 
-     
 
      /**
-     * @depends testUserShouldLoginAndReturnToken
+     * A basic test example.
+     *
+     * @return void
      */
-    public function testUserShouldLogoutSucessfully(string $token) : void
+    public function testUserShouldLogoutSucessfully() : void
     {
 
-        $response = $this->get('api/logout', ['Authorization' => 'Bearer '.$token]);
+        $response = $this->get('api/logout', ['Authorization' => 'Bearer '.$this->token]);
 
         $response->assertOk();
         $response->assertJson(['msg' => 'Successfully logged out']);

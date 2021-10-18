@@ -89,4 +89,6 @@ The following database info must be filled in .env file
     DB_USERNAME=
     DB_PASSWORD=
     
-The Pagseguro credentials like Pagseguro account e-mail and token is also required in the config file inside pagseguro paste
+The Pagseguro credentials like Pagseguro account e-mail and token is also required in the config file inside pagseguro paste, see more about its configuration in https://github.com/pagseguro/pagseguro-sdk-php.
+
+Run the Laravel command "php artisan db:seed" to generate database sample data.

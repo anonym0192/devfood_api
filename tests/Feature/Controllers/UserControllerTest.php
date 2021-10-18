@@ -4,7 +4,6 @@ namespace Tests\Feature\Controllers;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -13,6 +12,24 @@ class UserControllerTest extends TestCase{
 
     use RefreshDatabase;
 
+    private $user;
+
+    private $token;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create();
+
+        $this->token = $this->user->createToken('email')->plainTextToken;
+        
+    }
+
+    public function tearDown(): void{
+        $this->user->delete();
+    }
+
     /**
      * A basic test example.
      *
@@ -20,30 +37,27 @@ class UserControllerTest extends TestCase{
      */
     public function testUserShouldBeRegisteredSuccessfully()
     {
-        
-        $user = User::factory()->make();
-     
-        $userPassword = Str::random(13);
-        
-        $payload = [
-                'name' => $user->name,
-                'email' => $user->email, 
-                'password' => $userPassword,
-                'password_confirmation' => $userPassword, 
-                'cpf' => $user->cpf, 
-                'area_code' => $user->area_code,
-                'born_date' => $user->born_date,
-                'phone' => $user->phone,
-            ];
-        
-
-        $response = $this->post('api/register', $payload);
     
+        $payload = [
+            'name' => 'Some Other UserName',
+            'email' => 'changedemail@net.com', 
+            'password' => '123',
+            'password_confirmation' => '123', 
+            'cpf' => '22222222222222', 
+            'area_code' => '21',
+            'born_date' => '1995-01-01',
+            'phone' => '66666666',
+        ];
+        
+        $response = $this->post('api/register', $payload);
+        
         $response->assertCreated();
         $response->assertJsonStructure(['token' => [], 'user' => ['id','name', 'email', 'cpf', 'born_date', 'phone', 'area_code']]);
 
-        $this->assertDatabaseHas($user, ['name' => $user->name , 'email' => $user->email, 'cpf' => $user->cpf, 'area_code' => $user->area_code, 'born_date' => $user->born_date, 'phone' => $user->phone]);
+        $this->assertDatabaseHas($this->user , ['name' => $payload['name'] , 'email' => $payload['email'], 'cpf' => $payload['cpf'], 'area_code' => $payload['area_code'], 'born_date' => $payload['born_date'], 'phone' => $payload['phone']]);
         
+        $createdUser = $response['user']['id'];
+        User::destroy($createdUser);
     }
 
        /**
@@ -53,75 +67,55 @@ class UserControllerTest extends TestCase{
      */
     public function testUserUpdateUsingDifferentId()
     {
-        
-        $user = User::factory()->create();
-
-        $token = $user->createToken('email')->plainTextToken;
-        
+             
         $payload = [
             'name' => 'Some Other UserName',
-            'email' => 'changedemail@net.com', 
-            'password' => 123,
-            'password_confirmation' => 123, 
-            'cpf' => '22222222222222', 
-            'area_code' => '21',
-            'born_date' => '1995-01-01',
-            'phone' => '66666666',
-        ];
-
-
-        $response = $this->put("api/user/666666", $payload, ['Authorization' => 'Bearer '.$token]);
-
-        $response->assertStatus(401);
-        $response->assertJson(['error' => 'Unauthorized']);
-
-    }
-    /*
-    * A basic test example.
-    *
-    * @return void
-    */
-   public function testUserShouldBeUpdatedSuccessfully()
-   {
-       
-        $user = User::factory()->create();
-
-        $token = $user->createToken('email')->plainTextToken;
-        
-        $payload = [
-            'name' => 'Some Other UserName',
-            'email' => 'changedemail@net.com', 
-            'password' => 123,
-            'password_confirmation' => 123, 
+            'email' => Str::random(5).'@net.com', 
+            'password' => 'changedpwd',
+            'password_confirmation' => 'changedpwd', 
             'cpf' => '22222222222', 
             'area_code' => '21',
             'born_date' => '1995-01-01',
             'phone' => '66666666',
         ];
 
+        $response = $this->put("api/user/666666", $payload, ['Authorization' => 'Bearer '.$this->token]);
 
-        $response = $this->put("api/user/$user->id", $payload, ['Authorization' => 'Bearer '.$token]);
+        $response->assertStatus(401);
+        $response->assertJson(['error' => 'Unauthorized']);
 
+        return $payload;
+
+    }
+    /**
+     * @depends testUserUpdateUsingDifferentId
+     */
+   public function testUserShouldBeUpdatedSuccessfully(array $payload): void
+   {
+        
+        $response = $this->put("api/user/".$this->user->id , $payload, ['Authorization' => 'Bearer '.$this->token]);
+        
         $response->assertOk();
         $response->assertJsonStructure(['msg' , 'user' => ['id','name', 'email', 'cpf', 'born_date', 'phone', 'area_code']]);
 
-        $this->assertDatabaseHas($user, ['id' => $user->id,'name' => $payload['name'] , 'email' => $payload['email'], 'cpf' => $payload['cpf'], 'area_code' => $payload['area_code'], 'born_date' => $payload['born_date'], 'phone' => $payload['phone']]);
-
+        $this->assertDatabaseHas($this->user, ['id' => $this->user->id,'name' => $payload['name'] , 'email' => $payload['email'], 'cpf' => $payload['cpf'], 'area_code' => $payload['area_code'], 'born_date' => $payload['born_date'], 'phone' => $payload['phone']]);
 
    }
 
    public function testOnlyAdminCanDeleteUsers()
     {
+        //A non admin user created
         $user = User::factory()->state(['admin' => 0])->create();
         
         $token = $user->createToken('email')->plainTextToken;
 
-        $response = $this->delete("api/user/$user->id", [], ['Authorization' => 'Bearer '.$token]);
+        $response = $this->delete("api/user/".$user->id, [], ['Authorization' => 'Bearer '.$token]);
 
         $response->assertUnauthorized();
     
         $this->assertDatabaseHas($user, ['id' => $user->id]);
 
+        $user->delete();
     }
 
     /**
@@ -131,12 +125,8 @@ class UserControllerTest extends TestCase{
      */
     public function testUserDeleteIdDoesnotExist()
     {
-        
-        $user = User::factory()->create();
 
-        $token = $user->createToken('email')->plainTextToken;
-
-        $response = $this->delete("api/user/548785558", [], ['Authorization' => 'Bearer '.$token]);
+        $response = $this->delete("api/user/548785558", [], ['Authorization' => 'Bearer '.$this->token]);
 
         $response->assertStatus(400);
         $response->assertJsonStructure(['error']);
@@ -151,22 +141,15 @@ class UserControllerTest extends TestCase{
      */
     public function testUserShouldBeDeletedSuccessfully()
     {
-        $user = User::factory()->state(['admin' => 1])->create();
-
-    
-        $token = $user->createToken('email')->plainTextToken;
-
-        $response = $this->delete("api/user/$user->id", [], ['Authorization' => 'Bearer '.$token]);
+  
+        $response = $this->delete("api/user/".$this->user->id, [], ['Authorization' => 'Bearer '.$this->token]);
 
         $response->assertOk();
-        $response->assertJson(['msg' => "User $user->id deleted successfully!"]);
+        $response->assertJson(['msg' => "User ".$this->user->id." deleted successfully!"]);
 
-        $this->assertDatabaseMissing($user, ['id' => $user->id]);
+        $this->assertDatabaseMissing($this->user, ['id' => $this->user->id]);
         
     }
-
-
-
 
 
 }
