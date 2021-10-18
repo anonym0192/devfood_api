@@ -27,7 +27,7 @@ class ProductControllerTest extends TestCase{
 
         $mockImage = UploadedFile::fake()->image('fakeimage.jpg', 800, 800);
 
-        $response = $this->put("api/image/product/$product->id", ['image' => $mockImage], ['Authorization' => 'Bearer '.$token]);
+        $response = $this->post("api/image/product/$product->id", ['image' => $mockImage], ['Authorization' => 'Bearer '.$token]);
 
         $response->assertOk();
         $response->assertJsonStructure(['msg' , 'url']);

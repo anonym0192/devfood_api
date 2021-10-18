@@ -60,7 +60,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/product', [ProductController::class, 'store']);       //ADMIN
     Route::put('/product/{id}', [ProductController::class, 'update']);   //ADMIN
     Route::delete('/product/{id}', [ProductController::class, 'destroy']);  //ADMIN
-    Route::put('/image/product/{id}', [ProductController::class, 'updateProductImage']); //ADMIN
+    Route::post('/image/product/{id}', [ProductController::class, 'updateProductImage']); //ADMIN
 
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/order/{id}', [OrderController::class, 'show']); //ADMIN

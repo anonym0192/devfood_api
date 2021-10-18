@@ -173,7 +173,7 @@ class ProductController extends Controller
 
             $filename = md5(time().rand(0,9999)).'.jpg';
             $destPath = public_path('/uploads/products');
-
+            
             Image::make($image)->save($destPath.'/'.$filename);
 
             $product = Product::find($id);
@@ -185,9 +185,9 @@ class ProductController extends Controller
             $product->image = $filename;
             $product->save();
 
-            $imageUrl = url($destPath.'/'.$filename);
+            $imageUrl = url('/uploads/products/'.$filename);
 
-            return response()->json(['msg' => 'Image of Product $id was updated successfully!', 'url' => $imageUrl], 200);
+            return response()->json(['msg' => "Image of Product $id was updated successfully!", 'url' => $imageUrl], 200);
 
         }else{
             return response()->json(['error' => 'File extension not supported'], 400);

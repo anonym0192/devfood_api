@@ -17,11 +17,12 @@ class UserSeeder extends Seeder
     {
         //
         DB::table('users')->insert([
+            'cpf' => '11111111111',
             'name' => 'teste',
             'email' => 'teste@gmail.com',
             'password' => Hash::make(666),
             //'username' => 'tester',
-            'type' => 'admin',
+            'admin' => 1,
             'created_at' => now(),
             'updated_at' => now()
         ]);

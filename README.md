@@ -53,7 +53,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /product Create new product in store [POST] //ADMIN
     /product/{id} Update product info [PUT] //ADMIN
     /product/{id}  Remove product [DELETE] //ADMIN
-    /image/product/{id} Update product image [PUT] //ADMIN
+    /image/product/{id} Update product image [POST] //ADMIN
 
     /orders List all orders from a user [GET]
     /order/{id} Get a specific order [GET] //ADMIN
