@@ -4,7 +4,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
 ## Features
 -Create a new User , Delete and Update its profile info
 
--A User who is admin can Register a new Product
+-A User who is admin can Create a new Product
 
 -Login Authentication using a token
 
@@ -53,6 +53,7 @@ Backend version of a REST API using Laravel, the payment of item is made using a
     /product Create new product in store [POST] //ADMIN
     /product/{id} Update product info [PUT] //ADMIN
     /product/{id}  Remove product [DELETE] //ADMIN
+    /image/product/{id} Update product image [PUT] //ADMIN
 
     /orders List all orders from a user [GET]
     /order/{id} Get a specific order [GET] //ADMIN

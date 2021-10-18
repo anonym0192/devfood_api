@@ -51,7 +51,7 @@ class DeliveryAreaController extends Controller
     public function addCity(Request $request)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -91,7 +91,7 @@ class DeliveryAreaController extends Controller
     public function addDistrict(Request $request)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -136,7 +136,7 @@ class DeliveryAreaController extends Controller
     {
 
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -165,7 +165,7 @@ class DeliveryAreaController extends Controller
     public function removeDistrict(Request $request, $id)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -191,7 +191,7 @@ class DeliveryAreaController extends Controller
     public function disableDistrict(Request $request, $id)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -218,7 +218,7 @@ class DeliveryAreaController extends Controller
     public function enableDistrict(Request $request, $id)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

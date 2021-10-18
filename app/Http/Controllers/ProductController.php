@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
+use Intervention\Image\ImageManagerStatic as Image;
+
 
 class ProductController extends Controller
 {
@@ -116,7 +116,7 @@ class ProductController extends Controller
     {
         //
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -125,6 +125,7 @@ class ProductController extends Controller
         $validator = Validator::make( $request->all(),[
                 'name' => 'required|string|min:3|max:200',
                 'description' => 'required|string|max:500',
+                //'image' => '',
                 'price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
                 'category' => 'required|numeric',
             ]);
@@ -145,6 +146,55 @@ class ProductController extends Controller
         $response['product'] = $product;
 
         return response($response, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     * @param Request $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     * */
+    public function updateProductImage(Request $request, $id){
+
+        if(auth()->user()->admin !== 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+
+        $allowedTypes =  ['image/jpg', 'image/jpeg', 'image/png'];
+
+        $image = $request->file('image');
+
+        if(!$image){
+            return response()->json(['error' => 'No image was sent'] , 400);
+        }
+
+        if(in_array($image->getClientMimeType(), $allowedTypes ) ){
+
+            $filename = md5(time().rand(0,9999)).'.jpg';
+            $destPath = public_path('/uploads/products');
+
+            Image::make($image)->save($destPath.'/'.$filename);
+
+            $product = Product::find($id);
+
+            if(!$product){
+                return response()->json(['error' => "Product $id does not exist"], 400);
+            }
+
+            $product->image = $filename;
+            $product->save();
+
+            $imageUrl = url($destPath.'/'.$filename);
+
+            return response()->json(['msg' => 'Image of Product $id was updated successfully!', 'url' => $imageUrl], 200);
+
+        }else{
+            return response()->json(['error' => 'File extension not supported'], 400);
+        }
+
+        
+
     }
 
     /**
@@ -191,7 +241,7 @@ class ProductController extends Controller
     {
         //
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -231,7 +281,7 @@ class ProductController extends Controller
                 
                 $response['product'] = $product;
                 $response['msg'] = "The product '$id' was updated successfully";
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 $response['error'] = $e->getMessage();
                 return response($response,500);
             }
@@ -255,7 +305,7 @@ class ProductController extends Controller
     {
         //  
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

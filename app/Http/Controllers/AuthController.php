@@ -6,13 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->loggedUser = Auth::user();
+        //$this->loggedUser = Auth::user();
     }
 
     /**
@@ -30,9 +29,8 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
     
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            
+            return response()->json(['error' => 'The provided credentials are incorrect.'], 401 );
         }
     
         $token = $user->createToken($request->email)->plainTextToken;
@@ -49,7 +47,7 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::user()->tokens()->delete();
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['msg' => 'Successfully logged out']);
     }
 
     

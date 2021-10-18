@@ -44,7 +44,7 @@ class CouponController extends Controller
     public function createCoupon(Request $request)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -81,7 +81,7 @@ class CouponController extends Controller
     public function removeCoupon(Request $request, $code)
     {
 
-        if(!auth()->user()->admin === 1){
+        if(auth()->user()->admin !== 1){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

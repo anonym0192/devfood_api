@@ -34,7 +34,7 @@ class CreateAllTables extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name', 200);
-            $table->string('email', 50);
+            $table->string('email', 50)->unique();
            // $table->string('username', 50)->unique();
             $table->string('password', 100);
             $table->integer('phone')->nullable();
@@ -45,7 +45,7 @@ class CreateAllTables extends Migration
             $table->boolean('admin')->default(false);
             $table->rememberToken();
             $table->timestamps();
-        
+            $table->dateTime('email_verified_at')->nullable();
         });
 
         Schema::create('orders', function (Blueprint $table) {

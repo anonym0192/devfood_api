@@ -39,6 +39,9 @@ class AllTablesSeeder extends Seeder
         ]);
 
         DB::table('products')->insert([
+            ['name' => 'Coca-cola 350ml', 'description' => 'Latinha de coca-cola 350ml', 'image' => 'cola350ml.jpg', 'price' => '6.00',  'category_id' => '1'],
+            ['name' => 'Guaraná 350ml', 'description' => 'Latinha de guaraná 350ml', 'image' => 'guarana350ml.jpeg', 'price' => '6.00',  'category_id' => '1'],
+            ['name' => 'Batata frita', 'description' => 'Pacote de batata média', 'image' => 'batata-frita.jpeg', 'price' => '8.00',  'category_id' => '4'],
             ['name' => 'Donut de Chocolate', 'description' => 'Donut feito de chocolate e açucar', 'image' => 'donutchocolate.jpg', 'price' => '15.00', 'category_id' => '5'],
             ['name' => 'Donut de Flocos', 'description' => 'Donut com flocos e cobertura de morango', 'image' => 'donutflocos.jpg', 'price' => '15.00',  'category_id' => '5'],
             ['name' => 'Torta de Chocolate', 'description' => 'Uma torta de chocolate', 'image' => 'tortachocolate.jpg', 'price' => '12.00', 'category_id' => '5'],

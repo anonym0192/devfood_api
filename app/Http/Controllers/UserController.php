@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -17,7 +18,7 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all() , [
-                        'name' => "required|string|min:2|max:100|regex:/^[a-zA-Z-' ]*$/",
+                        'name' => "required|string|min:2|max:100|regex:/^[a-zA-Z-'. ]*$/",
                         'email' => "required|min:5|max:80|email|unique:users,email",
                         'cpf' => "required|numeric|min:11",
                         'born_date' => "required|date",
@@ -65,9 +66,9 @@ class UserController extends Controller
     {
         //
         $validator = Validator::make($request->all() , [
-            'name' => "string|min:2|max:100|regex:/^[a-zA-Z-' ]*$/",
+            'name' => "string|min:2|max:100|regex:/^[a-zA-Z-'. ]*$/",
             'email' => "email|min:5|max:80",
-            'cpf' => "nullable|require|numeric|min:11",
+            'cpf' => "nullable|required|numeric|min:11",
             'born_date' => "nullable|date",
             'area_code' => 'nullable|digits:2',
             'phone' => "nullable|string|min:8|max:20",
@@ -80,15 +81,18 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
+        if($id != Auth::user()['id']){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $email = $request->input('email');
         
-
         $user = User::find($id);
 
         if( $email ){
             $emailExists = User::where('email', $email )->count();
                      
-            if( ( $emailExists > 0 ) && ( $email != auth()->user()['email'] ) ){
+            if( ( $emailExists > 0 ) && ( $email != Auth::user()['email'] ) ){
                 return response()->json( ['error' => 'The email has already been taken.'] );
             }
         }
@@ -151,10 +155,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    /*
+    
     public function destroy($id)
     {
-        //
+        if(Auth::user()->admin != 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
         $user = User::find($id);
         if($user){
             $user->delete();
@@ -162,7 +169,7 @@ class UserController extends Controller
             return response($response, 200);
         }else{
             $response['error'] = "User $id does not exist";
-            return response($response, 404);
+            return response($response, 400);
         }
-    } */
+    } 
 }
