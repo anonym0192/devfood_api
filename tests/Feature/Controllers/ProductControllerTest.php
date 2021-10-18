@@ -19,11 +19,11 @@ class ProductControllerTest extends TestCase{
     public function testUploadProductImageShouldBesuccessfull(): void {
 
 
-        $user = User::factory()->state(['admin' => 0])->create();
+        $user = User::factory()->state(['admin' => 1])->create();
         
         $token = $user->createToken('email')->plainTextToken;
 
-        $product = Product::factory()->create();
+        $product = Product::factory()->state(['image' => null])->create();
 
         $mockImage = UploadedFile::fake()->image('fakeimage.jpg', 800, 800);
 
@@ -32,8 +32,9 @@ class ProductControllerTest extends TestCase{
         $response->assertOk();
         $response->assertJsonStructure(['msg' , 'url']);
 
-        $this->assertDatabaseHas($product, ['id' => $product->id, 'image' => $response['url']]);
+        $product = $product->fresh();
 
+        $this->assertNotNull($product->image);
 
     }
 }
