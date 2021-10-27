@@ -13,23 +13,6 @@ class CreateAllTables extends Migration
      */
     public function up()
     {
-        
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 200);
-            $table->text('description', 500);
-            $table->string('image', 200)->nullable();
-            $table->decimal('price', 5, 2);
-            $table->foreignId('category_id')->constrained('categories');
-            $table->timestamps();
-        });
-
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 80);
-            $table->string('slug', 20)->unique();
-            $table->string('image', 100)->nullable();
-        });
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
@@ -47,6 +30,26 @@ class CreateAllTables extends Migration
             $table->timestamps();
             $table->dateTime('email_verified_at')->nullable();
         });
+        
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 80);
+            $table->string('slug', 20)->unique();
+            $table->string('image', 100)->nullable();
+        });
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 200);
+            $table->text('description', 500);
+            $table->string('image', 200)->nullable();
+            $table->decimal('price', 5, 2);
+            $table->foreignId('category_id')->constrained('categories');
+            $table->timestamps();
+        });
+
+
+        
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
@@ -72,6 +75,11 @@ class CreateAllTables extends Migration
             $table->timestamps();
         });
 
+        Schema::create('payment_types', function (Blueprint $table){
+            $table->id();
+            $table->string('name');
+        });
+
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('code');
@@ -81,11 +89,6 @@ class CreateAllTables extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('order_id')->unique()->constrained('orders')->onDelete('cascade');
             $table->timestamps();
-        });
-
-        Schema::create('payment_types', function (Blueprint $table){
-            $table->id();
-            $table->string('name');
         });
 
         Schema::create('coupons', function (Blueprint $table){
