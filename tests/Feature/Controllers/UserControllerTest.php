@@ -60,14 +60,15 @@ class UserControllerTest extends TestCase{
         User::destroy($createdUser);
     }
 
-       /**
+    /**
      * A basic test example.
      *
      * @return void
      */
-    public function testUserUpdateUsingDifferentId()
-    {
-             
+    
+   public function testUserShouldBeUpdatedSuccessfully(): array
+   {
+
         $payload = [
             'name' => 'Some Other UserName',
             'email' => Str::random(5).'@net.com', 
@@ -78,20 +79,6 @@ class UserControllerTest extends TestCase{
             'born_date' => '1995-01-01',
             'phone' => '66666666',
         ];
-
-        $response = $this->put("api/user/666666", $payload, ['Authorization' => 'Bearer '.$this->token]);
-
-        $response->assertStatus(401);
-        $response->assertJson(['error' => 'Unauthorized']);
-
-        return $payload;
-
-    }
-    /**
-     * @depends testUserUpdateUsingDifferentId
-     */
-   public function testUserShouldBeUpdatedSuccessfully(array $payload): void
-   {
         
         $response = $this->put("api/user/".$this->user->id , $payload, ['Authorization' => 'Bearer '.$this->token]);
         
@@ -100,7 +87,22 @@ class UserControllerTest extends TestCase{
 
         $this->assertDatabaseHas($this->user, ['id' => $this->user->id,'name' => $payload['name'] , 'email' => $payload['email'], 'cpf' => $payload['cpf'], 'area_code' => $payload['area_code'], 'born_date' => $payload['born_date'], 'phone' => $payload['phone']]);
 
+        return $payload;
    }
+
+    /**
+     * @depends testUserShouldBeUpdatedSuccessfully
+     */
+    public function testUserUpdateUsingDifferentId(array $payload): void
+    {
+             
+        $response = $this->put("api/user/666666", $payload, ['Authorization' => 'Bearer '.$this->token]);
+
+        $response->assertStatus(401);
+        $response->assertJson(['error' => 'Unauthorized']);
+
+    }
+
 
    public function testOnlyAdminCanDeleteUsers()
     {
