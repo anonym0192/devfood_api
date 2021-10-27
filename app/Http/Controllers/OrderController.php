@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItems;
 use App\Models\Transaction;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -246,57 +248,69 @@ class OrderController extends Controller
 
         //id_address, cumpom, products[{id, qt}], payment_data , payment_type, delivery_cost 
 
-        $total = 0;
+        DB::beginTransaction(); 
 
-        $products = $request->input('products');
-        
-        foreach($products as $item){
-            $product = Product::find($item['id']);
-            if(!$product){
-                return response()->json(['error' => "Product $id doesn't exist"], 400);
+        try{
+            $total = 0;
+
+            $products = $request->input('products');
+            
+            foreach($products as $item){
+                $product = Product::find($item['id']);
+                if(!$product){
+                    return response()->json(['error' => "Product ". $item['id']." doesn't exist"], 400);
+                }
+                $total += floatval($product->price) * intval($item['qt']);
             }
-            $total += floatval($product->price) * intval($item['qt']);
+            
+            /*
+                Payment process
+            */
+
+            $deliveryCost = $request->input('deliveryCost') ?? 0;
+            $total += $deliveryCost;
+
+            $order = new Order;
+            $order->user_id = Auth::user()->id;
+            $order->total = $total;
+            
+            $order->street = $request->input('street');
+            $order->number = $request->input('number');
+            $order->complement = $request->input('complement');
+            $order->postal_code = $request->input('postalCode');
+            $order->city = $request->input('city');
+            $order->state = $request->input('state');
+            $order->delivery_cost = $deliveryCost;
+
+            
+            $order->save();
+
+        
+            foreach($products as $item ){
+                $OrderItems = new OrderItems;
+                $OrderItems->product_id = $item['id'];
+                $OrderItems->qt = $item['qt'];
+                $OrderItems->order_id = $order->id;
+                $OrderItems->save();
+            }
+
+            $transactionCode = $request->input('transactionCode');
+            $paymentType = $request->input('paymentType', 1);
+
+            $this->generateTransaction( $transactionCode, $order->id , 1);
+
+            DB::commit();
+
+            return response()->json(['msg' => "Order created successfully", 'order' => $order]);
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()]);
         }
-        
-        /*
-            Payment process
-        */
 
-        $deliveryCost = $request->input('deliveryCost') ?? 0;
-        $total += $deliveryCost;
 
-        $order = new Order;
-        $order->user_id = Auth::user()->id;
-        $order->total = $total;
-        
-        $order->street = $request->input('street');
-        $order->number = $request->input('number');
-        $order->complement = $request->input('complement');
-        $order->postal_code = $request->input('postalCode');
-        $order->city = $request->input('city');
-        $order->state = $request->input('state');
-        $order->delivery_cost = $deliveryCost;
 
         
-        $order->save();
-
-       
-        foreach($products as $item ){
-            $OrderItems = new OrderItems;
-            $OrderItems->product_id = $item['id'];
-            $OrderItems->qt = $item['qt'];
-            $OrderItems->order_id = $order->id;
-            $OrderItems->save();
-        }
-
-        $transactionCode = $request->input('transactionCode');
-        $paymentType = $request->input('paymentType', 1);
-
-        $this->generateTransaction( $transactionCode, $order->id , 1);
-
-
-
-        return response()->json(['msg' => "Order created successfully", 'order' => $order]);
 
     }
 

@@ -20,7 +20,7 @@ class CreateAllTables extends Migration
             $table->text('description', 500);
             $table->string('image', 200)->nullable();
             $table->decimal('price', 5, 2);
-            $table->foreignId('category_id');
+            $table->foreignId('category_id')->constrained('categories');
             $table->timestamps();
         });
 
@@ -51,7 +51,7 @@ class CreateAllTables extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->decimal('total', 5,2);
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             //$table->foreignId('cupom')->nullable();
             $table->string('street',100);
             $table->string('number',80);
@@ -67,8 +67,8 @@ class CreateAllTables extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
             $table->integer('qt');
-            $table->foreignId('product_id');
-            $table->foreignId('order_id');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -78,8 +78,8 @@ class CreateAllTables extends Migration
             $table->tinyInteger('mode')->default(0);
             $table->tinyInteger('type')->default(1);
             $table->tinyInteger('status')->default(1);
-            $table->foreignId('user_id');
-            $table->foreignId('order_id')->unique();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('order_id')->unique()->constrained('orders')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -106,7 +106,7 @@ class CreateAllTables extends Migration
         Schema::create('districts', function (Blueprint $table){
             $table->id();
             $table->string('name');
-            $table->foreignId('city');
+            $table->foreignId('city')->constrained('cities')->onDelete('cascade');
             $table->boolean('available')->default(true);
             $table->decimal('delivery_cost', 5,2)->default(3.00);
         });
