@@ -4,7 +4,7 @@ namespace Tests\Feature\Controllers;
 
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Support\Facades\File;
@@ -40,7 +40,39 @@ class ProductControllerTest extends TestCase{
 
     public function testNormalUserCannotCreateProduct(): void {
 
+        
+        $normalUser = User::factory()->state(['admin' => 0])->create();
 
+        $token = $normalUser->createToken('email')->plainTextToken;
+
+        $response = $this->post("api/product", [] , ['Authorization' => 'Bearer '.$token]);
+
+        $response->assertUnauthorized();
+        $response->assertJsonStructure(['error']);
+
+        $normalUser->delete();
+
+
+    }
+
+    public function testAdminUserCanCreateAProduct(): void{
+
+        $payload = [
+            'name' => 'Teste Product '.Str::random(20),
+            'description' => 'Teste Description',
+            'price' => 150,
+            'category' => 1,
+        ];
+
+
+        $response = $this->post("api/product", $payload , ['Authorization' => 'Bearer '.$this->token]);
+        $response->assertCreated();
+        $response->assertJsonStructure(['msg', 'product']);
+
+        $this->assertDatabaseHas('products', ['name' => $payload['name'], 'description' => $payload['description'], 'price' => $payload['price'], 'category_id' => $payload['category']]);
+
+        Product::destroy($response['product']['id']);
+        
     }
     
     public function testUploadProductImageShouldBesuccessfull(): void {
