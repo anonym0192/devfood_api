@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Transaction;
 
 
 class CheckOutController extends Controller
@@ -23,6 +22,7 @@ class CheckOutController extends Controller
     {
         //
         $validator = Validator::make($request->all(), [
+                        'order_id' => 'required|numeric',
                         'products.*.id' => 'required|numeric',
                         'products.*.name' => 'required|string',
                         'products.*.price' => 'required|regex:/\d+.\d{2}/',//regex:/^\d+(\.\d{1,2})?$/',
@@ -41,7 +41,7 @@ class CheckOutController extends Controller
                         'discount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
                         'redirectURL' => 'required|string|max:50',
                         'notificationURL' => 'required|string|max:50'
-        ]);
+        ]); 
 
         $products = $request->input('products');
 
@@ -79,7 +79,7 @@ class CheckOutController extends Controller
 
        
         $payment->setCurrency("BRL");
-        $payment->setReference("LIBPHP000001");
+        $payment->setReference($request->input('order_id'));
 
         $payment->setRedirectUrl(env('APP_URL'). "/nofitication");
 
@@ -136,34 +136,5 @@ class CheckOutController extends Controller
         
     }
 
-    /**
-     * Notify and change the payment status
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function notifyPayment(Request $request)
-    {
-        //
-        
-        \PagSeguro\Library::initialize();
-        \PagSeguro\Library::cmsVersion()->setName("Nome")->setRelease("1.0.0");
-        \PagSeguro\Library::moduleVersion()->setName("Nome")->setRelease("1.0.0");
 
-        try {
-            if (\PagSeguro\Helpers\Xhr::hasPost()) {
-                $response = \PagSeguro\Services\Transactions\Notification::check(
-                    \PagSeguro\Configuration\Configure::getAccountCredentials()
-                );
-            } else {
-                throw new \InvalidArgumentException($_POST);
-            }
-
-            print_r($response);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
-        
-    }
 }

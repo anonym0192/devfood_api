@@ -61,8 +61,8 @@ class CreateAllTables extends Migration
             $table->string('postal_code',20);
             $table->string('city',80);
             $table->char('state',2);
-            //$table->smallInteger('status')->default(0);
             $table->decimal('delivery_cost', 5,2);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
 
@@ -79,7 +79,7 @@ class CreateAllTables extends Migration
             $table->string('name');
         });
 
-        Schema::create('transactions', function (Blueprint $table) {
+       /* Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('code');
             $table->tinyInteger('mode')->default(0);
@@ -88,7 +88,7 @@ class CreateAllTables extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('order_id')->unique()->constrained('orders')->onDelete('cascade');
             $table->timestamps();
-        });
+        }); */
 
         Schema::create('coupons', function (Blueprint $table){
             $table->id();
@@ -125,6 +125,6 @@ class CreateAllTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('all_tables');
+        //Schema::dropIfExists('all_tables');
     }
 }

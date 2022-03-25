@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItems;
-use App\Models\Transaction;
+//use App\Models\Transaction;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
@@ -52,35 +53,9 @@ class OrderController extends Controller
 
             $items = OrderItems::where('order_id', $order['id'])->get();
 
-            $transaction = Transaction::where('order_id', $order['id'])->first();
 
-            switch($transaction->status){
-                case '0':
-                case '1': // Aguardando Pgto.
-                case '2': // Em análise
-                    $order['status'] = 'Aguardando Pgto';
-                    break;
-                case '3': // Paga
-                case '4': // Disponível
-                    $order['status'] = 'Aprovado';
-                    break;
-                case '6': // Devolvida
-                case '7': // Cancelada
-                    $order['status'] = 'Cancelado';
-                    break;
-            }
+            $order['status'] = getStatusDescription($order->status);
 
-            
-            /*if($transaction){
-                switch($transaction['type']){
-                    case '0':
-                        $order['payment_type'] = 'Cartão de Debito';
-                        break;
-                    case '1':
-                        $order['payment_type'] = 'Cartão de Crédito';
-                        break;
-                }
-            } */
             
             $productList = [];
         
@@ -161,20 +136,22 @@ class OrderController extends Controller
             ]); 
 
         if($validator->fails()){
-            return response()->json([$validator->$errors], 400);
+            return response()->json([$validator->errors()], 400);
         }
 
-        $transaction = Transaction::where('order_id', $id)->first();
+        $status = $request->input('status');
 
-        if($transaction){
 
-            $transaction['status'] = $request->input('status');
-            $transaction->save();
+        try{
 
+            
+            $this->changeOrderStatus($id, $status);
             return response()->json(['msg' => "Transaction status for order $id changed"], 200);
-        }else{
-            return response()->json(['error' => 'Invalid transaction data'], 400);
+            
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 400);
         }
+        
         
     }
 
@@ -224,13 +201,10 @@ class OrderController extends Controller
             return response()->json(['error' => 'The products data is empty or contains an error'],400);
         }
 
-        
-
 
         $validator = Validator::make($request->all(), [
                 'products.*.id' => 'required|numeric',
                 'products.*.qt' => 'required|numeric',
-                'paymentType' => 'required|numeric',
                 'deliveryCost' => 'numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'cupom' => 'nullable|string|max:200',
                 'street' => 'required|string|max:80',
@@ -239,7 +213,6 @@ class OrderController extends Controller
                 'postalCode' => 'required|string|max:10',
                 'city' => 'nullable|string|max:200',
                 'state' => 'nullable|string|min:2|max:2',
-                'transactionCode' => 'required|string|max:200'
               ]);  
 
         if($validator->fails()){
@@ -281,7 +254,7 @@ class OrderController extends Controller
             $order->city = $request->input('city');
             $order->state = $request->input('state');
             $order->delivery_cost = $deliveryCost;
-
+            $order->status = 1;
             
             $order->save();
 
@@ -293,11 +266,6 @@ class OrderController extends Controller
                 $OrderItems->order_id = $order->id;
                 $OrderItems->save();
             }
-
-            $transactionCode = $request->input('transactionCode');
-            $paymentType = $request->input('paymentType', 1);
-
-            $this->generateTransaction( $transactionCode, $order->id , 1);
 
             DB::commit();
 
@@ -314,29 +282,85 @@ class OrderController extends Controller
 
     }
 
-       /**
-     * Create a new transaction
+        /**
+     * Notify and change the payment status
      *
-     * @param  String  $transactionCode
-     * @param  int  $orderId
-     * @param  int  $paymentType
-     * @return Array
+     * @param  Request  $request
+     * @return \Illuminate\Http\Response
      */
-    private function generateTransaction(String $transactionCode, int $orderId, int $paymentType = 1)
+    public function notifyPayment(Request $request)
     {
         //
-        $transaction = new Transaction;
+        
+        \PagSeguro\Library::initialize();
+        \PagSeguro\Library::cmsVersion()->setName("Nome")->setRelease("1.0.0");
+        \PagSeguro\Library::moduleVersion()->setName("Nome")->setRelease("1.0.0");
 
-        $transaction->code = $transactionCode;
-        $transaction->mode = $paymentType;
-        $transaction->type = 1;
-        $transaction->status = 1;
-        $transaction->user_id = Auth::user()->id;
-        $transaction->order_id = $orderId;
-        $transaction->save();
-          
+       try {
+            if (\PagSeguro\Helpers\Xhr::hasPost()) {
+                
+                $credentials = \PagSeguro\Configuration\Configure::getAccountCredentials();
 
+                $notificationCode = $request->input('notificationCode');
+
+                $pagSeguroNotificationEndpoint = "";
+
+                if(env('APP_ENV') == "local"){
+                    $pagSeguroNotificationEndpoint = "https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/$notificationCode";
+                }else{
+                    $pagSeguroNotificationEndpoint = "https://ws.pagseguro.uol.com.br/v3/transactions/notifications/$notificationCode";
+                }
+
+                $response = Http::withHeaders([
+                    'Accept' => 'application/xml',
+                    'Content-Type' => 'application/json'
+                ])->get($pagSeguroNotificationEndpoint, [
+                    'email' => $credentials->getEmail(),
+                    'token' => $credentials->getToken()
+                ]);
+               
+    
+                $xml = simplexml_load_string($response);
+
+                $reference = $xml->reference;
+                $status = $xml->status;
+
+                $this->changeOrderStatus($reference, $status);
+                 
+                
+            } else {
+                throw new \InvalidArgumentException();
+            }
+ 
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+        
     }
 
+    /**
+     * Notify and change the payment status
+     *
+     * @param string $reference
+     * @param string $status
+     * @return \Illuminate\Http\Response
+     */
+    private function changeOrderStatus($reference, $status)
+    {
+        
+        $status = formatOrderStatus($status);
+
+        $order = Order::find($reference);
+
+        if($order){
+            $order->status = $status;
+            $order->save();
+
+            return true;
+        }else{
+            throw new Exception("Order not found!") ;
+        }
+
+    }
 
 }
