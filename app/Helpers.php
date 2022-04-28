@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\File;
+
 function formatOrderStatus($status){
 
     $newStatus = 0;
@@ -36,4 +38,28 @@ function getStatusDescription($status){
         default:
              return '';
     }
+}
+
+function createProductImageLink(String $imageName){
+    return url('/uploads/products/'.$imageName);
+}
+
+function createCategoryImageLink(String $imageName){
+    return url('/uploads/categories/'.$imageName);
+}
+
+function getProductsDirectoryPath(){
+    return public_path('/uploads/products');
+}
+
+function getCategoriesDirectoryPath(){
+    return public_path('/uploads/categories');
+}
+
+function removeOldImage(String $filepath){
+
+    if($filepath){
+        File::delete($filepath);
+    }
+
 }

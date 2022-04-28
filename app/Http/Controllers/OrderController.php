@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Order;
-use App\Models\Product;
-use App\Models\OrderItems;
-//use App\Models\Transaction;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Repositories\OrderRepository;
 
 class OrderController extends Controller
 {
+    private OrderRepository $orderRepository;
     
+    public function __construct(OrderRepository $orderRepository){
+        $this->orderRepository = $orderRepository; 
+    }
+
     //
      /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class OrderController extends Controller
         //
         $response = [];
 
-        $orders_per_page = 10;
+        $ordersByPage = 10;
 
         $page = $request->query('page');
 
@@ -35,49 +35,9 @@ class OrderController extends Controller
             $page = 1;
         }
 
-        $offset = ($page - 1) * $orders_per_page;
-        
+        $response = $this->orderRepository->getOrdersFromLoggedUser($page, $ordersByPage);
 
-        $orders = Order::where('user_id', Auth::user()->id);
-
-        
-        $orders_total =  $orders->count();
-        
-        $pages = ceil( $orders_total / $orders_per_page );
-        
-        
-        $orders = $orders->offset($offset)->limit($orders_per_page)->orderBy('created_at')->get();
-        
-
-        foreach($orders as $order){
-
-            $items = OrderItems::where('order_id', $order['id'])->get();
-
-
-            $order['status'] = getStatusDescription($order->status);
-
-            
-            $productList = [];
-        
-            foreach($items as $item){
-                
-                $product = Product::find($item['product_id']);
-                if($product){
-                    $productList[] = $product;
-                }
-            }
-    
-            $order['products'] = $productList;  
-
-        }
-
-        $response['orders'] = $orders;
-        $response['total'] = $orders_total;
-        $response['current_page'] = $page < 1 ? 1 : intval($page);
-        $response['total_pages'] = $pages;
-              
-        return response()->json( $response ); 
-
+        return response()->json($response);
 
     }
 
@@ -93,29 +53,13 @@ class OrderController extends Controller
         //
         $response = [];
 
-        $order = Order::where('id',$id,)->where('user_id', Auth::user()->id)->first();
-        
+        $order = $this->orderRepository->getById($id);
+
         if(!$order){
-            return response()->json(['error' => 'Unauthorized'], 401);
-        } 
-
-        $order['user'] =  Auth::user();
-
-        $items = OrderItems::where('order_id', $order['id'])->get();
-  
-        $productList = [];
-
-        foreach($items as $item){
-            
-            $product = Product::find($item['product_id']);
-            if($product){
-                $productList[] = $product;
-            }
+            return response()->json(['error' => 'Order not found'], 404);
         }
-
-        $order['products'] = $productList;
-        
-        return response()->json(['order' => $order]); 
+    
+        return response()->json(['order' => $order]);  
 
     }
 
@@ -130,6 +74,10 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         //
+
+        if(auth()->user()->admin !== 1){
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
         
         $validator = Validator::make($request->all(), [
             'status' => 'required|numeric',
@@ -141,11 +89,9 @@ class OrderController extends Controller
 
         $status = $request->input('status');
 
-
         try{
-
             
-            $this->changeOrderStatus($id, $status);
+            $this->orderRepository->changeOrderStatus($id, $status);
             return response()->json(['msg' => "Transaction status for order $id changed"], 200);
             
         }catch(\Exception $e){
@@ -219,61 +165,28 @@ class OrderController extends Controller
             return response()->json([$validator->errors()], 400);
         }
 
-        //id_address, cumpom, products[{id, qt}], payment_data , payment_type, delivery_cost 
-
-        DB::beginTransaction(); 
-
-        try{
-            $total = 0;
-
-            $products = $request->input('products');
-            
-            foreach($products as $item){
-                $product = Product::find($item['id']);
-                if(!$product){
-                    return response()->json(['error' => "Product ". $item['id']." doesn't exist"], 400);
-                }
-                $total += floatval($product->price) * intval($item['qt']);
-            }
-            
-            /*
-                Payment process
-            */
-
-            $deliveryCost = $request->input('deliveryCost') ?? 0;
-            $total += $deliveryCost;
-
-            $order = new Order;
-            $order->user_id = Auth::user()->id;
-            $order->total = $total;
-            
-            $order->street = $request->input('street');
-            $order->number = $request->input('number');
-            $order->complement = $request->input('complement');
-            $order->postal_code = $request->input('postalCode');
-            $order->city = $request->input('city');
-            $order->state = $request->input('state');
-            $order->delivery_cost = $deliveryCost;
-            $order->status = 1;
-            
-            $order->save();
-
         
-            foreach($products as $item ){
-                $OrderItems = new OrderItems;
-                $OrderItems->product_id = $item['id'];
-                $OrderItems->qt = $item['qt'];
-                $OrderItems->order_id = $order->id;
-                $OrderItems->save();
-            }
-
-            DB::commit();
-
+        //id_address, cumpom, products[{id, qt}], payment_data , payment_type, delivery_cost 
+            
+        
+        try{
+            
+            $order = $this->orderRepository->create($request->only([
+                'products', 
+                'deliveryCost', 
+                'cumpom', 
+                'street', 
+                'complement', 
+                'number',
+                'postalCode',
+                'city',
+                'state']));
+            
             return response()->json(['msg' => "Order created successfully", 'order' => $order]);
 
         }catch(\Exception $e){
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()] , 404);
         }
 
 
@@ -325,7 +238,7 @@ class OrderController extends Controller
                 $reference = $xml->reference;
                 $status = $xml->status;
 
-                $this->changeOrderStatus($reference, $status);
+                $this->orderRepository->changeOrderStatus($reference, $status);
                  
                 
             } else {
@@ -338,29 +251,5 @@ class OrderController extends Controller
         
     }
 
-    /**
-     * Notify and change the payment status
-     *
-     * @param string $reference
-     * @param string $status
-     * @return \Illuminate\Http\Response
-     */
-    private function changeOrderStatus($reference, $status)
-    {
-        
-        $status = formatOrderStatus($status);
-
-        $order = Order::find($reference);
-
-        if($order){
-            $order->status = $status;
-            $order->save();
-
-            return true;
-        }else{
-            throw new Exception("Order not found!") ;
-        }
-
-    }
 
 }

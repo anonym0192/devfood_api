@@ -72,5 +72,17 @@ class AllTablesSeeder extends Seeder
             ['name' => 'Centro', 'city' => 2, 'available' => true, 'delivery_cost' => 4],
             ['name' => 'Centro', 'city' => 3, 'available' => true, 'delivery_cost' => 3.50],
         ]);
+
+        DB::table('orders')->insert([
+            ['total' => 50, 'user_id' => 1, 'street' => 'Rua inexistente', 'number' => 101, 'postal_code' => 11111111, 'city' => 'São Paulo', 'state' => 'SP', 'delivery_cost' => 3],
+            ['total' => 125, 'user_id' => 1, 'street' => 'Rua inexistente', 'number' => 120, 'postal_code' => 22222222, 'city' => 'São Paulo', 'state' => 'SP', 'delivery_cost' => 3],
+            ['total' => 25, 'user_id' => 1, 'street' => 'Rua inexistente', 'number' => 10, 'postal_code' => 22222222, 'city' => 'São Paulo', 'state' => 'SP', 'delivery_cost' => 3]
+        ]);
+
+        DB::table('order_items')->insert([
+            ['qt' => 2, 'product_id' => 8, 'order_id' => 1],
+            ['qt' => 5, 'product_id' => 8, 'order_id' => 2],
+            ['qt' => 1, 'product_id' => 8, 'order_id' => 3],
+        ]);
     }
 }

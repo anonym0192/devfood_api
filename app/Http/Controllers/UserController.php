@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository){
+        $this->userRepository = $userRepository;
+    }
 
     /**
      * Register a new User and generate a token
@@ -33,26 +40,23 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         
-        $user = User::create([
-                    'name' => $request->input('name'),
-                    'email' => $request->input('email'),
-                    'cpf' => $request->input('cpf'),
-                    'born_date' => $request->input('born_date'),
-                    'phone' => $request->input('phone'),
-                    //'cellphone' => $request->input('cellphone'),
-                    'area_code' => $request->input('area_code'),
-                    'password' => bcrypt($request->input('password')),
-                    //'username' => $request->input('username')
-                ]);
+        try{
 
-        $token = $user->createToken('email')->plainTextToken;
+            $user = $this->userRepository->create($request->all());
 
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
+            $token = $user->createToken('email')->plainTextToken;
 
-        return response($response, 201);
+            $response = [
+                'user' => $user,
+                'token' => $token
+            ];
+
+            return response($response, 201);
+
+        }catch(\Exception $e){
+            return response(['error' => $e->getMessage()], 400); 
+        }
+        
     }
 
     /**
@@ -68,7 +72,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all() , [
             'name' => "string|min:2|max:100|regex:/^[a-zA-Z-'. ]*$/",
             'email' => "email|min:5|max:80",
-            'cpf' => "nullable|required|numeric|min:11",
+            'cpf' => "nullable|numeric|min:11",
             'born_date' => "nullable|date",
             'area_code' => 'nullable|digits:2',
             'phone' => "nullable|string|min:8|max:20",
@@ -83,67 +87,32 @@ class UserController extends Controller
 
         if($id != Auth::user()['id']){
             return response()->json(['error' => 'Unauthorized'], 401);
-        }
+        } 
 
         $email = $request->input('email');
-        
-        $user = User::find($id);
 
         if( $email ){
-            $emailExists = User::where('email', $email )->count();
+
+            $emailExists = $this->userRepository->isEmailAlreadyTaken($email);
                      
-            if( ( $emailExists > 0 ) && ( $email != Auth::user()['email'] ) ){
+            if( ( $emailExists ) && ( $email != Auth::user()['email'] ) ){
                 return response()->json( ['error' => 'The email has already been taken.'] );
             }
         }
-        
-        /*if(   $request->input('username') ){
-            $usernameExists = User::where('username',  $username )->count();
-            if( ( $usernameExists > 0 ) && ( $username != auth()->user()['username'] ) ){
-                return response()->json( ['error' => 'The username has already been taken.'] );
-            }
-        } */
- 
-       
-        if($user){
-            if($request->input('name')){
-                $user->name = $request->input('name');
-            }
-            if($request->input('email')){
-                $user->email = $request->input('email');
-            }
-            
-            if($request->input('cpf')){
-                $user->cpf = $request->input('cpf');
-            }
 
-            if($request->input('born_date')){
-                $user->born_date = $request->input('born_date');
-            }
+        try{
 
-            if($request->input('area_code')){
-                $user->area_code = $request->input('area_code');
-            }
-
-            if($request->input('phone')){
-                $user->phone = $request->input('phone');
-            }
-
-            
-            if($request->input('password')){
-                $user->password = bcrypt($request->input('password'));
-            }
-            
-            
-            $user->save();
+            $user = $this->userRepository->updateById($id, $request->all());
 
             $response['user'] = $user;
             $response['msg'] = "User $id was updated successfully!";
-            return response($response, 200);
-        }else{
-            $response['error'] = "User $id does not exist";
-            return response($response, 404);
+            return response()->json($response, 200);
+
+
+        }catch(\Exception $e){
+            return response(['error' => $e->getMessage()], 400); 
         }
+
 
 
     }
@@ -162,14 +131,18 @@ class UserController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        $user = User::find($id);
-        if($user){
-            $user->delete();
-            $response['msg'] = "User $id deleted successfully!";
-            return response($response, 200);
-        }else{
-            $response['error'] = "User $id does not exist";
-            return response($response, 400);
+    
+        try{
+
+            $user = $this->userRepository->deleteById($id);
+
+            $response['user'] = $user;
+            $response['msg'] = "User $id was deleted successfully!";
+            return response()->json($response, 200);
+
+
+        }catch(\Exception $e){
+            return response(['error' => $e->getMessage()], 400); 
         }
     } 
 }

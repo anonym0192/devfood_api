@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\UserRepository;
 
 class AuthController extends Controller
 {
-    public function __construct()
+
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository)
     {
-        //$this->loggedUser = Auth::user();
+        $this->userRepository = $userRepository;
     }
 
     /**

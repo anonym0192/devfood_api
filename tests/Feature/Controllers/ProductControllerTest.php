@@ -88,7 +88,7 @@ class ProductControllerTest extends TestCase{
         $product = $this->product->fresh();
 
         $this->assertNotNull($product->image);
-
+        
         $filepath = public_path('uploads/products/'.$product->image);
         File::delete($filepath);
 

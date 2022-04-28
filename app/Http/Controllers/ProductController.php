@@ -3,14 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\ImageManagerStatic as Image;
+use App\Repositories\ProductRepository;
 
 
 class ProductController extends Controller
 {
+
+    private ProductRepository $productRepository;
+
+    public function __construct(ProductRepository $productRepository){
+        $this->productRepository = $productRepository;
+    }
+
     /**
      * Display a listing of the resource.
      * @param  \Illuminate\Http\Request  $request
@@ -21,7 +27,7 @@ class ProductController extends Controller
         //
         $response = [];
 
-        $products_per_page = 10;
+        $productsPerPage = 10;
 
         $category = $request->query('category');
         $search = $request->query('search') ?? '';
@@ -32,42 +38,7 @@ class ProductController extends Controller
             $page = 1;
         }    
 
-        $offset = ($page - 1) * $products_per_page;
-        
-
-        $products = Product::select();
-
-        if($search ){
-            $products->where('name', 'LIKE', '%'.$search.'%');
-        }
-
-        if($category && $category > 0){
-            $products->where('category_id', $category);
-        }
-
-        $products_total =  $products->count();
-    
-        $products = $products->offset($offset)->limit($products_per_page)->get();
-
-        $pages = ceil( $products_total / $products_per_page );
-
-        foreach($products as $prod){
-
-            $prod['image'] = url('uploads/products/'.$prod['image']);
-            
-            $cat = Category::find($prod['category_id']);
-            unset($prod['category_id']);
-
-            if($cat){
-                $prod['category'] = $cat;
-            }
-        }
-
-        $response['products'] = $products;
-        $response['total'] = $products_total;
-        $response['current_page'] = $page < 1 ? 1 : intval($page);
-        $response['total_pages'] = $pages;
-        
+        $response = $this->productRepository->getAll($category, $search, $page, $productsPerPage);
     
         return response()->json($response);
     }
@@ -82,23 +53,11 @@ class ProductController extends Controller
         //
         $response = [];
 
-        if($category == 0){
-            $products = Product::all();
-        }else{
-            $products = Product::where('category_id', $category)->get();
-        }
+        if( !ctype_digit($category) || $category < 1 ){
+            $category = 0;
+        }    
 
-        foreach($products as $prod){
-
-            $prod['image'] = url('uploads/products/'.$prod['image']);
-            
-            $cat = Category::find($prod['category_id']);
-            unset($prod['category_id']);
-
-            if($cat){
-                $prod['category'] = $cat;
-            }
-        }
+        $products = $this->productRepository->getByCategory($category);
 
         $response['products'] = $products;
     
@@ -134,16 +93,14 @@ class ProductController extends Controller
             return response()->json([$validator->errors()], 400);
         }
 
-        $product = new Product;
-        $product->name = $request->input('name');
-        $product->description = $request->input('description');
-        $product->price = $request->input('price');
-        $product->category_id = $request->input('category');
+        try{
+            $product = $this->productRepository->create($request->all());
 
-        $product->save();
-        
-        $response['msg'] = "Product created successfully";
-        $response['product'] = $product;
+            $response['msg'] = "Product created successfully";
+            $response['product'] = $product;
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
 
         return response($response, 201);
     }
@@ -172,20 +129,20 @@ class ProductController extends Controller
         if(in_array($image->getClientMimeType(), $allowedTypes ) ){
 
             $filename = md5(time().rand(0,9999)).'.jpg';
-            $destPath = public_path('/uploads/products');
+            $destPath = getProductsDirectoryPath(); //public_path('/uploads/products');
             
             Image::make($image)->save($destPath.'/'.$filename);
 
-            $product = Product::find($id);
+            try{
 
-            if(!$product){
-                return response()->json(['error' => "Product $id does not exist"], 400);
+                $this->productRepository->updateImage($id, $filename);
+
+            }catch(\Exception $e){
+                return response()->json(['error' => $e->getMessage()], 400);
             }
 
-            $product->image = $filename;
-            $product->save();
-
-            $imageUrl = url('/uploads/products/'.$filename);
+            
+            $imageUrl = createProductImageLink($filename);
 
             return response()->json(['msg' => "Image of Product $id was updated successfully!", 'url' => $imageUrl], 200);
 
@@ -208,25 +165,17 @@ class ProductController extends Controller
         //
         $response = [];
 
-        $product = Product::find($id);
+        try{
 
-        if($product){
+            $product = $this->productRepository->getById($id);
 
-            $cat = Category::find($product['category_id']);
-            unset($product['category_id']);
-            
-            if($cat){
-                $product['category'] = $cat;
-            }
-            
-            $response['product'] = $product;
-            return response($response, 200);
-        }else{
-            $response['error'] = "The item was not found"; 
+            return response()->json(['product' => $product],200);
+
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage(); 
             return response($response, 404);
         }
-        
-        
+
     }
 
    
@@ -258,40 +207,16 @@ class ProductController extends Controller
             return response()->json([$validator->errors()], 400);
         }
 
-        $product = Product::find($id);
-
-        
-        if($product){
+        try{
             
-            if($request->input('name')){
-                $product->name = $request->input('name');
-            }
-            if($request->input('description')){
-                $product->description = $request->input('description');
-            }
-            if($request->input('price')){
-                $product->price = $request->input('price');
-            }
-            if($request->input('category')){
-                $product->category_id = $request->input('category');
-            }
-
-            try{
-                $product->save();
-                
-                $response['product'] = $product;
-                $response['msg'] = "The product '$id' was updated successfully";
-            }catch(\Exception $e){
-                $response['error'] = $e->getMessage();
-                return response($response,500);
-            }
-        }else{
-            $response['error'] = "The product '$id' was not found";
-            return response($response,404);
+            $product = $this->productRepository->updateById($id, $request->all());
+            
+            $response['product'] = $product;
+            $response['msg'] = "The product '$id' was updated successfully";
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return response($response, 404);
         }
-        
-        return response($response,200);
-
 
     }
 
@@ -309,14 +234,14 @@ class ProductController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $product = Product::find($id);
-
-        if($product){
-            $product->delete();
-            
+        
+        try{
+            $this->productRepository->deleteById($id);
             return response()->json(['msg' => 'Product '. $id .'deleted successfully!']);
-        }else{
-            return response()->json(['error' => 'Product '. $id .'does not exist!'], 404);
+           
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return response($response,404);
         }
         
     }
@@ -334,11 +259,11 @@ class ProductController extends Controller
 
         $response = [];
 
-        $product = Product::where('name', 'LIKE', '%'.$name.'%')->get()->all();
+        $product = $this->productRepository->searchByName($name);
 
-        if($product){
-            $response['product'] = $product;
-        }
+       
+        $response['product'] = $product;
+        
         
         return response($response, 200);
     }

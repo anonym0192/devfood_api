@@ -5,10 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Coupon;
 use Illuminate\Support\Facades\Validator;
+use App\Repositories\CouponRepository;
 
 class CouponController extends Controller
 {
     //
+
+    private CouponRepository $couponRepository;
+
+    public function __construct(CouponRepository $couponRepository){
+        $this->couponRepository = $couponRepository;
+    }
 
     /**
      * Use the cupom code in case it is valid
@@ -24,14 +31,15 @@ class CouponController extends Controller
         if(!$code){
             return response()->json(['error' => 'Coupon code is empty'], 400);
         }
-
-        $coupon = Coupon::where('code', $code)->where('expire_date' ,'>', date('Y-m-d'))->first();
-
-        if(!$coupon){
-            return response()->json(['error' => 'Coupon code is not valid'], 400);
+        
+        try{
+            
+            $coupon = $this->couponRepository->getByCouponCode($code);
+            return response()->json(['coupon' => $coupon], 200);
+            
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 404);
         }
-
-        return response()->json(['coupon' => $coupon], 200);
 
     }
 
@@ -51,23 +59,24 @@ class CouponController extends Controller
         $validator = Validator::make($request->all() , [
             'code' => "required|string|min:4|max:10|regex:/^[a-zA-Z-0-9']*$/|unique:coupons",
             'value' => "required|regex:/^\d+(\.\d{1,2})?$/",
-            'expireDate' => "required|date",
+            'expire_date' => "required|date",
         ]); 
 
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $coupon = Coupon::create([
-                'code' => $request->input('code'),
-                'value' => $request->input('value'),
-                'expire_date' => $request->input('expireDate'),
-            ]);
+        try{
+            
+            $coupon = $this->couponRepository->create($request->all());
+            return response()->json(['msg' => 'Coupon created successfully!', 'coupon' => $coupon], 201);
+            
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
 
-        $coupon->save();
 
-
-        return response()->json(['msg' => 'Coupon created successfully!', 'coupon' => $coupon], 201);
+      
 
     }
 
@@ -85,13 +94,13 @@ class CouponController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $coupon = Coupon::where('code', $code)->get()->first();
-
-        if($coupon){
-            $coupon->delete();
+        try{
+            
+            $this->couponRepository->deleteByCouponCode($code);
             return response()->json(['msg' => 'Coupon '. $code .'deleted successfully!']);
-        }else{
-            return response()->json(['error' => 'Coupon '. $code .'does not exist!'], 404);
+            
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 404);
         }
         
     }
